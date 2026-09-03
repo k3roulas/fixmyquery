@@ -2,6 +2,7 @@
 
 import type { Finding, PlanNode } from '@/lib/types';
 
+import HelpDot from './HelpDot';
 import { describeNodeType } from './nodeTypeDescriptions';
 import { formatMs } from './PlanNodeCard';
 
@@ -10,10 +11,43 @@ interface Props {
   findings: Finding[];
 }
 
+const NODE_HELP: Record<string, string> = {
+  'Inclusive time':
+    "Time spent in this node plus all its children; the % is its share of the query's total execution time.",
+  Loops:
+    'Number of times this node ran. Costs multiply by loops — a fast node executed 10,000 times can dominate the plan.',
+  'Rows (est → actual per loop)':
+    'Planner estimate vs measured rows returned per loop. Large gaps point to stale statistics or misestimated predicates.',
+  'Est/actual ratio':
+    'Actual ÷ estimated rows. Far from 1× the planner misjudged, which can lead to wrong join or scan strategy choices.',
+  Relation: 'The table (and its alias) this node reads.',
+  Index:
+    'The index this scan uses via its Index Cond. A filter already served by this index does not need a new one.',
+  'Filter / Index Cond':
+    'Predicate applied here: an Index Cond seeks the index directly; a plain Filter discards rows after reading them.',
+  'Join Filter':
+    'Predicate checked on each row pair during the join — evaluated per match and unable to use an index on the outer side.',
+  'Rows removed by filter':
+    'Rows read then discarded by the filter. Close to actual rows, it means the scan wastes most of its work — usually fixed by an index.',
+  'Sort key':
+    'Columns and direction the sort uses. An index with the same key and direction lets Postgres skip this sort entirely.',
+  'Sort method':
+    "Algorithm used and its footprint. Disk space or 'external merge' means work_mem was too small for the sort.",
+  Hash: 'Hash table shape for this node. More than 1 batch means it spilled to disk — raise work_mem or shrink the build side.',
+  'Shared buffers':
+    '8kB pages touched here: hit = served from Postgres cache, read = fetched from disk. High reads on a hot table hint at cache or index problems.',
+  'Temp buffers':
+    '8kB pages in temporary files (read + written). Non-zero means a sort or hash spilled out of work_mem onto disk.',
+};
+
 function Row({ label, value }: { label: string; value: string }) {
+  const help = NODE_HELP[label];
   return (
     <div className="flex gap-3 px-3 py-1.5 text-sm odd:bg-zinc-900/60">
-      <dt className="w-44 shrink-0 text-zinc-500">{label}</dt>
+      <dt className="group relative w-44 shrink-0 text-zinc-500">
+        {label}
+        {help ? <HelpDot text={help} side="bottom" /> : null}
+      </dt>
       <dd className="min-w-0 break-words font-mono text-xs text-zinc-200">{value}</dd>
     </div>
   );

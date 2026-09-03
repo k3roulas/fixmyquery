@@ -5,6 +5,7 @@ import type { AnalysisResult } from '@/lib/types';
 
 import AnalyzeForm from './AnalyzeForm';
 import ErrorBanner from './ErrorBanner';
+import PageContainer from './PageContainer';
 import ResultsView from './ResultsView';
 import SaveHint from './SaveHint';
 
@@ -44,7 +45,7 @@ export default function Workspace() {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-7xl gap-6 p-4 sm:p-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+    <PageContainer className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
       <aside className="xl:sticky xl:top-6 xl:self-start">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
           <h1 className="mb-1 text-base font-semibold text-zinc-100">Analyze a query</h1>
@@ -76,6 +77,6 @@ export default function Workspace() {
           )
         )}
       </main>
-    </div>
+    </PageContainer>
   );
 }

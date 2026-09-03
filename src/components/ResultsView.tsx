@@ -5,6 +5,7 @@ import type { AnalysisResult } from '@/lib/types';
 
 import AiSummary from './AiSummary';
 import BottleneckList from './BottleneckList';
+import HelpDot from './HelpDot';
 import IndexSuggestions from './IndexSuggestions';
 import NodeDetailPanel from './NodeDetailPanel';
 import { formatMs } from './PlanNodeCard';
@@ -31,40 +32,6 @@ const STAT_HELP: Record<string, string> = {
   'temp written':
     '8kB pages spilled to temporary files when sorts or hashes outgrow work_mem. Healthy queries write ~0.',
 };
-
-function HelpDot({
-  text,
-  anchor = 'center',
-  side = 'top',
-}: {
-  text: string;
-  anchor?: 'center' | 'right';
-  side?: 'top' | 'bottom';
-}) {
-  const [open, setOpen] = useState(false);
-  const position = anchor === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2';
-  const vertical = side === 'bottom' ? 'top-full mt-2' : 'bottom-full mb-2';
-  return (
-    <>
-      <button
-        type="button"
-        aria-label={`Help: ${text}`}
-        onClick={() => setOpen((v) => !v)}
-        className="ml-1 cursor-help text-zinc-600 hover:text-emerald-400"
-      >
-        ⓘ
-      </button>
-      <div
-        role="tooltip"
-        className={`pointer-events-none absolute z-20 w-64 ${vertical} ${position} rounded-lg border border-zinc-700 bg-zinc-900 p-2 text-left text-xs leading-relaxed text-zinc-300 shadow-xl ${
-          open ? 'block' : 'hidden group-hover:block group-focus-within:block'
-        }`}
-      >
-        {text}
-      </div>
-    </>
-  );
-}
 
 function Stat({ label, value }: { label: string; value: string }) {
   const help = STAT_HELP[label];
