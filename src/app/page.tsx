@@ -4,6 +4,10 @@ import Screenshot from '@/components/marketing/Screenshot';
 import { getSession } from '@/lib/auth/session';
 import { ROUTES } from '@/lib/routes';
 
+// Unoptimized next/image skips the basePath-aware loader, so public asset srcs
+// need the prefix manually (see images.unoptimized in next.config.ts).
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
 export default async function MarketingPage() {
   const session = await getSession();
 
@@ -47,7 +51,7 @@ export default async function MarketingPage() {
           )}
         </div>
         <Screenshot
-          src="/marketing/app-overview.png"
+          src={`${BASE_PATH}/marketing/app-overview.png`}
           alt="The FixMyQuery workspace: query input on the left, full analysis results on the right"
           width={1475}
           height={894}
