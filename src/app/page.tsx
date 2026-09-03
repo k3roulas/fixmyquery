@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import FeatureCard from '@/components/marketing/FeatureCard';
-import ScreenshotPlaceholder from '@/components/marketing/ScreenshotPlaceholder';
+import Screenshot from '@/components/marketing/Screenshot';
 import { getSession } from '@/lib/auth/session';
 import { ROUTES } from '@/lib/routes';
 
@@ -46,7 +46,12 @@ export default async function MarketingPage() {
             </>
           )}
         </div>
-        <ScreenshotPlaceholder caption="Plan tree with bottleneck highlights" />
+        <Screenshot
+          src="/marketing/app-overview.png"
+          alt="The FixMyQuery workspace: query input on the left, full analysis results on the right"
+          width={1475}
+          height={894}
+        />
       </section>
 
       <section className="space-y-4">
@@ -75,9 +80,31 @@ export default async function MarketingPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2">
-        <ScreenshotPlaceholder caption="Optimized SQL variants" />
-        <ScreenshotPlaceholder caption="Proposed indexes with DDL" />
+      <section className="space-y-4 text-center">
+        <h2 className="text-xl font-bold text-zinc-100 sm:text-2xl">
+          Ready to fix your slow query?
+        </h2>
+        <p className="mx-auto max-w-2xl text-sm text-zinc-400">
+          Analyzing queries works without an account — registering lets you keep a history of your
+          analyses.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {session ? (
+            <Link
+              href={ROUTES.app}
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
+            >
+              Open the app
+            </Link>
+          ) : (
+            <Link
+              href={ROUTES.register}
+              className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
+            >
+              Get started
+            </Link>
+          )}
+        </div>
       </section>
     </div>
   );
