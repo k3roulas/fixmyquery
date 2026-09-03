@@ -1,0 +1,22 @@
+module.exports = {
+  apps: [
+    {
+      name: 'fixmyquery-web',
+      script: '.next/standalone/server.js',
+      cwd: '{{ app_home }}/current',
+      env: {
+        PORT: {{ app_port }},
+        HOSTNAME: '127.0.0.1',
+      },
+      instances: 1,
+      autorestart: true,
+      max_restarts: 10,
+      restart_delay: 5000,
+      watch: false,
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      out_file: '{{ app_home }}/shared/logs/web-out.log',
+      error_file: '{{ app_home }}/shared/logs/web-error.log',
+      merge_logs: true,
+    },
+  ],
+};

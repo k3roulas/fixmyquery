@@ -1,0 +1,6 @@
+---
+# Production-specific overrides
+app_env: production
+
+# Database
+database_url: "postgres://{{ postgres_user }}:{{ postgres_password }}@localhost:5432/{{ postgres_db }}"

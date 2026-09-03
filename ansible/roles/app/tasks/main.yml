@@ -1,0 +1,194 @@
+---
+# FixMyQuery deployment: shared server (also hosts altqr) — additive only.
+# Creates its own PostgreSQL database/user; never touches other databases or apps.
+
+# --- Database (tags: db) ---
+
+- name: Create PostgreSQL user
+  block:
+    - name: Create application role
+      become_user: postgres
+      postgresql_user:
+        name: "{{ postgres_user }}"
+        password: "{{ postgres_password }}"
+        role_attr_flags: NOSUPERUSER,NOCREATEDB
+      no_log: true
+
+    - name: Create application database
+      become_user: postgres
+      postgresql_db:
+        name: "{{ postgres_db }}"
+        owner: "{{ postgres_user }}"
+        encoding: UTF8
+        lc_collate: en_US.UTF-8
+        lc_ctype: en_US.UTF-8
+        template: template0
+  tags: db
+
+# --- Application (tags: app) ---
+
+- name: Provision app user and directories
+  block:
+    - name: Create application user
+      user:
+        name: "{{ app_user }}"
+        group: "{{ app_group }}"
+        home: "{{ app_home }}"
+        shell: /bin/bash
+        create_home: false
+
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0755"
+        state: directory
+      loop:
+        - "{{ app_home }}"
+        - "{{ app_home }}/releases"
+        - "{{ app_home }}/shared"
+        - "{{ app_home }}/shared/logs"
+  tags: app
+
+- name: Deploy application
+  block:
+    - name: Clone / update repository
+      git:
+        repo: "{{ app_repo }}"
+        dest: "{{ app_home }}/repo"
+        version: "{{ app_branch }}"
+        depth: 1
+        force: true
+      become_user: "{{ app_user }}"
+
+    - name: Create release directory
+      file:
+        path: "{{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0755"
+        state: directory
+
+    - name: Sync repo to release
+      command: >
+        rsync -a --exclude=node_modules --exclude=.git --exclude=.env --exclude=.next
+        {{ app_home }}/repo/ {{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/
+      become_user: "{{ app_user }}"
+
+    - name: Deploy .env file
+      template:
+        src: env.production.j2
+        dest: "{{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0600"
+      no_log: true
+
+    - name: Install dependencies
+      command: pnpm install --frozen-lockfile
+      args:
+        chdir: "{{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}"
+      become_user: "{{ app_user }}"
+      environment:
+        HOME: "{{ app_home }}"
+
+    - name: Build app
+      shell: |
+        set -a && . {{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/.env && set +a
+        pnpm build
+      args:
+        chdir: "{{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}"
+      become_user: "{{ app_user }}"
+      environment:
+        HOME: "{{ app_home }}"
+
+    - name: Copy static assets into standalone output
+      shell: |
+        cp -r {{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/public {{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/.next/standalone/public
+        cp -r {{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/.next/static {{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}/.next/standalone/.next/static
+      become_user: "{{ app_user }}"
+
+    - name: Switch current symlink to new release
+      file:
+        src: "{{ app_home }}/releases/{{ ansible_facts['date_time']['epoch'] }}"
+        dest: "{{ app_home }}/current"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        state: link
+        force: true
+
+    - name: Run database migrations
+      command: pnpm exec drizzle-kit migrate
+      args:
+        chdir: "{{ app_home }}/current"
+      become_user: "{{ app_user }}"
+      environment:
+        DATABASE_URL: "{{ database_url }}"
+        HOME: "{{ app_home }}"
+  tags: app
+
+# --- PM2 process management (tags: app) ---
+
+- name: Manage PM2 process
+  block:
+    - name: Deploy PM2 ecosystem config
+      template:
+        src: ecosystem.config.js.j2
+        dest: "{{ app_home }}/ecosystem.config.js"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: "0644"
+
+    - name: Start or reload PM2 process
+      command: pm2 startOrReload {{ app_home }}/ecosystem.config.js --update-env
+      args:
+        chdir: "{{ app_home }}"
+      become_user: "{{ app_user }}"
+      environment:
+        HOME: "{{ app_home }}"
+      changed_when: true
+
+    - name: Save PM2 process list
+      command: pm2 save
+      become_user: "{{ app_user }}"
+      environment:
+        HOME: "{{ app_home }}"
+      changed_when: false
+
+    - name: Ensure PM2 startup is configured
+      command: pm2 startup systemd -u {{ app_user }} --hp {{ app_home }}
+      changed_when: false
+  tags: app
+
+# --- Caddy reverse proxy (tags: caddy) ---
+
+- name: Configure Caddy
+  block:
+    - name: Deploy FixMyQuery Caddy config
+      template:
+        src: fixmyquery.conf.j2
+        dest: /etc/caddy/apps/fixmyquery.conf
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload caddy
+  tags: caddy
+
+# --- Housekeeping (tags: app) ---
+
+- name: Housekeeping
+  block:
+    - name: Deploy logrotate config
+      template:
+        src: logrotate.fixmyquery.j2
+        dest: /etc/logrotate.d/fixmyquery
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Remove old releases (keep last 3)
+      shell: |
+        ls -1dt {{ app_home }}/releases/* | tail -n +4 | xargs rm -rf
+      changed_when: false
+  tags: app

@@ -30,8 +30,9 @@ export async function POST(req: Request) {
   }
 
   const origin = new URL(req.url).origin;
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
   try {
-    await sendVerificationEmail(email, `${origin}/verify?token=${created.token}`);
+    await sendVerificationEmail(email, `${origin}${basePath}/verify?token=${created.token}`);
   } catch (err) {
     console.error('verification email failed', err);
     return NextResponse.json(

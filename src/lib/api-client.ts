@@ -1,12 +1,14 @@
 export type PostResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
+export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
 export async function postJson<T>(
   url: string,
   body: unknown,
   fallbackError: string
 ): Promise<PostResult<T>> {
   try {
-    const res = await fetch(url, {
+    const res = await fetch(`${BASE_PATH}${url}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

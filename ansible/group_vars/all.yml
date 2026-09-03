@@ -1,0 +1,33 @@
+---
+# App
+app_user: fixmyquery
+app_group: fixmyquery
+app_home: /opt/fixmyquery
+app_repo: https://github.com/k3roulas/fixmyquery.git
+app_branch: main
+app_port: 3002
+
+# Public endpoint: bare IP + path prefix (no domain → HTTP only)
+server_ip: 178.105.43.147
+base_path: /FixMyQuery
+
+# PostgreSQL (own database on the shared instance; other databases untouched)
+postgres_user: fixmyquery
+postgres_password: "{{ vault_postgres_password }}"
+postgres_db: fixmyquery
+
+# Auth
+jwt_secret: "{{ vault_jwt_secret }}"
+
+# AI provider (Z.ai coding endpoint)
+ai_base_url: https://api.z.ai/api/coding/paas/v4/
+ai_model: glm-5.3
+ai_thinking: disabled
+ai_api_key: "{{ vault_ai_api_key }}"
+
+# SMTP (Brevo relay, same account as altqr)
+smtp_host: "{{ vault_smtp_host }}"
+smtp_port: 587
+smtp_user: "{{ vault_smtp_user }}"
+smtp_password: "{{ vault_smtp_password }}"
+smtp_from: noreply@altqr.cc

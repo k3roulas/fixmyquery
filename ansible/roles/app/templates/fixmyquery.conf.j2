@@ -1,0 +1,28 @@
+# FixMyQuery — served under a path prefix on the bare server IP.
+# IP-only site: no domain, so no TLS (explicit http:// scheme keeps Caddy from trying).
+
+http://{{ server_ip }} {
+	redir / {{ base_path }}/ 308
+
+	handle {{ base_path }}/* {
+		reverse_proxy localhost:{{ app_port }}
+	}
+
+	handle {
+		respond 404
+	}
+
+	header {
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output file /var/log/caddy/fixmyquery.log {
+			roll_size 50mb
+			roll_keep 10
+		}
+	}
+}

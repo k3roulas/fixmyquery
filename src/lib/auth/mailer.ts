@@ -4,7 +4,14 @@ export async function sendVerificationEmail(to: string, verifyUrl: string): Prom
   const host = process.env.SMTP_HOST ?? 'localhost';
   const port = Number(process.env.SMTP_PORT ?? 1025);
   const from = process.env.MAIL_FROM ?? 'no-reply@fixmyquery.dev';
-  const transporter = nodemailer.createTransport({ host, port, secure: false });
+  const user = process.env.SMTP_USER;
+  const password = process.env.SMTP_PASSWORD;
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: false,
+    ...(user ? { auth: { user, pass: password } } : {}),
+  });
 
   await transporter.sendMail({
     from,

@@ -1,0 +1,6 @@
+---
+- name: Deploy FixMyQuery application
+  hosts: production
+  become: true
+  roles:
+    - app
