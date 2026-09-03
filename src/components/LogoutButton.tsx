@@ -24,7 +24,7 @@ export default function LogoutButton() {
       type="button"
       onClick={logout}
       disabled={busy}
-      className="text-zinc-400 hover:text-red-400 disabled:opacity-50"
+      className="cursor-pointer text-zinc-400 hover:text-red-400 disabled:opacity-50 disabled:cursor-default"
     >
       Logout
     </button>

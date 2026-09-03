@@ -30,12 +30,14 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="min-h-full flex flex-col">
         <header className="border-b border-zinc-800">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-            <Link href="/" className="flex items-baseline gap-2">
-              <span className="font-mono text-base font-bold text-emerald-400">FixMyQuery</span>
+            <div className="flex items-baseline gap-2">
+              <Link href="/" className="font-mono text-base font-bold text-emerald-400">
+                FixMyQuery
+              </Link>
               <span className="hidden text-xs text-zinc-500 sm:inline">
                 explain plan → diagnosis → fix
               </span>
-            </Link>
+            </div>
             <nav className="flex items-center gap-4 text-sm">
               {session ? (
                 <>

@@ -8,7 +8,6 @@ import AnalyzeForm from './AnalyzeForm';
 import ErrorBanner from './ErrorBanner';
 import PageContainer from './PageContainer';
 import ResultsView from './ResultsView';
-import SaveHint from './SaveHint';
 
 export default function Workspace() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -50,10 +49,7 @@ export default function Workspace() {
           </div>
         ) : null}
         {result ? (
-          <div className="space-y-4">
-            <ResultsView result={result} />
-            {result.saved ? <SaveHint analysisId={result.analysisId} /> : null}
-          </div>
+          <ResultsView result={result} />
         ) : (
           !error && (
             <div className="flex h-full min-h-64 items-center justify-center rounded-xl border border-dashed border-zinc-800 p-8 text-center text-sm text-zinc-500">

@@ -25,7 +25,7 @@ export default async function HistoryDetailPage({ params }: PageProps<'/history/
         <Link href="/history" className="text-sm text-emerald-400 hover:underline">
           ← Back to history
         </Link>
-        <span className="text-xs text-zinc-500">saved analysis (replayed)</span>
+        <span className="text-xs text-zinc-500">saved analysis</span>
       </div>
       <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
         <aside className="xl:sticky xl:top-6 xl:self-start">
