@@ -18,6 +18,8 @@ postgres_db: fixmyquery
 
 # Auth
 jwt_secret: "{{ vault_jwt_secret }}"
+# Served over plain HTTP on a bare IP → session cookie must not be Secure
+cookie_secure: "false"
 
 # AI provider (Z.ai coding endpoint)
 ai_base_url: https://api.z.ai/api/coding/paas/v4/

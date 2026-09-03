@@ -51,7 +51,8 @@ export async function setSessionCookie(payload: SessionPayload): Promise<void> {
   store.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    // Secure cookies need HTTPS; set COOKIE_SECURE=false when serving over plain HTTP (e.g. IP-only).
+    secure: process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== 'false',
     maxAge: SESSION_TTL_SECONDS,
     path: '/',
   });
