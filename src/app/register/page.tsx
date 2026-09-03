@@ -41,18 +41,20 @@ export default function RegisterPage() {
             We sent a verification link to <span className="font-mono">{email}</span>. Click it to
             activate your account, then sign in.
           </p>
-          <p className="mt-3 text-xs text-zinc-500">
-            In local development, open the{' '}
-            <a
-              href="http://localhost:8025"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-emerald-400 hover:underline"
-            >
-              Mailpit inbox at :8025
-            </a>{' '}
-            to find the email.
-          </p>
+          {process.env.NODE_ENV !== 'production' && (
+            <p className="mt-3 text-xs text-zinc-500">
+              In local development, open the{' '}
+              <a
+                href="http://localhost:8025"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 hover:underline"
+              >
+                Mailpit inbox at :8025
+              </a>{' '}
+              to find the email.
+            </p>
+          )}
           <Link
             href={ROUTES.login}
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
@@ -68,8 +70,7 @@ export default function RegisterPage() {
     <div className="mx-auto w-full max-w-md p-6">
       <h1 className="text-xl font-semibold text-zinc-100">Create an account</h1>
       <p className="mt-1 mb-4 text-sm text-zinc-500">
-        Registering lets you keep a history of your analyses. Analyzing queries works without an
-        account.
+        An account lets you run analyses and keep a history of them.
       </p>
 
       {error ? (

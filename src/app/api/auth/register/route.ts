@@ -30,7 +30,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Could not create account' }, { status: 500 });
   }
 
-  const origin = new URL(req.url).origin;
+  // Behind the production proxy, forwarded headers can be missing and req.url
+  // falls back to the bare listener (http://localhost:3002) — APP_ORIGIN pins
+  // the public origin; dev keeps deriving it from the request.
+  const origin = process.env.APP_ORIGIN ?? new URL(req.url).origin;
   try {
     await sendVerificationEmail(email, `${origin}${BASE_PATH}${ROUTES.verify(created.token)}`);
   } catch (err) {
