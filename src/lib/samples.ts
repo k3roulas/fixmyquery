@@ -6,15 +6,16 @@ export interface Sample {
   sql: string;
   explainJson: string;
   explainText: string;
+  /** Which EXPLAIN flavor loadSample pastes into the textarea. Default: JSON. */
+  format?: 'json' | 'text';
 }
 
-export const SAMPLES: Sample[] = [
-  {
-    id: 'missing-index',
-    title: 'Missing index on orders.customer_id',
-    blurb:
-      '500k-row orders table scanned end-to-end to serve a single-customer lookup. Classic missing-index shape.',
-    ddl: `CREATE TABLE orders (
+const missingIndex: Sample = {
+  id: 'missing-index',
+  title: 'Missing index on orders.customer_id',
+  blurb:
+    '500k-row orders table scanned end-to-end to serve a single-customer lookup. Classic missing-index shape.',
+  ddl: `CREATE TABLE orders (
   id            bigserial PRIMARY KEY,
   customer_id   bigint NOT NULL,
   status        text NOT NULL,
@@ -22,68 +23,68 @@ export const SAMPLES: Sample[] = [
   created_at    timestamptz NOT NULL
 );
 -- ~500,000 rows, no index on customer_id`,
-    sql: 'SELECT id, status, total_amount, created_at\nFROM orders\nWHERE customer_id = 42\nORDER BY created_at DESC\nLIMIT 20;',
-    explainJson: JSON.stringify([
-      {
-        Plan: {
-          'Node Type': 'Limit',
-          'Startup Cost': 134245.01,
-          'Total Cost': 134245.01,
-          'Plan Rows': 20,
-          'Plan Width': 44,
-          'Actual Startup Time': 379.816,
-          'Actual Total Time': 380.124,
-          'Actual Rows': 20,
-          'Actual Loops': 1,
-          'Shared Hit Blocks': 24740,
-          'Shared Read Blocks': 8154,
-          Plans: [
-            {
-              'Node Type': 'Sort',
-              'Parent Relationship': 'Outer',
-              'Startup Cost': 134245.0,
-              'Total Cost': 134245.01,
-              'Plan Rows': 500,
-              'Plan Width': 44,
-              'Actual Startup Time': 379.804,
-              'Actual Total Time': 379.912,
-              'Actual Rows': 500,
-              'Actual Loops': 1,
-              'Sort Key': ['created_at DESC'],
-              'Sort Method': 'top-N heapsort',
-              'Sort Space Used': 31,
-              'Sort Space Type': 'Memory',
-              'Shared Hit Blocks': 24692,
-              'Shared Read Blocks': 8152,
-              Plans: [
-                {
-                  'Node Type': 'Seq Scan',
-                  'Parent Relationship': 'Outer',
-                  'Relation Name': 'orders',
-                  Alias: 'orders',
-                  'Startup Cost': 0.0,
-                  'Total Cost': 134233.0,
-                  'Plan Rows': 400,
-                  'Plan Width': 44,
-                  'Actual Startup Time': 0.041,
-                  'Actual Total Time': 379.742,
-                  'Actual Rows': 500,
-                  'Actual Loops': 1,
-                  Filter: '(customer_id = 42)',
-                  'Rows Removed by Filter': 499500,
-                  'Shared Hit Blocks': 24692,
-                  'Shared Read Blocks': 8152,
-                },
-              ],
-            },
-          ],
-        },
-        'Planning Time': 0.231,
-        Triggers: [],
-        'Execution Time': 380.221,
+  sql: 'SELECT id, status, total_amount, created_at\nFROM orders\nWHERE customer_id = 42\nORDER BY created_at DESC\nLIMIT 20;',
+  explainJson: JSON.stringify([
+    {
+      Plan: {
+        'Node Type': 'Limit',
+        'Startup Cost': 134245.01,
+        'Total Cost': 134245.01,
+        'Plan Rows': 20,
+        'Plan Width': 44,
+        'Actual Startup Time': 379.816,
+        'Actual Total Time': 380.124,
+        'Actual Rows': 20,
+        'Actual Loops': 1,
+        'Shared Hit Blocks': 24740,
+        'Shared Read Blocks': 8154,
+        Plans: [
+          {
+            'Node Type': 'Sort',
+            'Parent Relationship': 'Outer',
+            'Startup Cost': 134245.0,
+            'Total Cost': 134245.01,
+            'Plan Rows': 500,
+            'Plan Width': 44,
+            'Actual Startup Time': 379.804,
+            'Actual Total Time': 379.912,
+            'Actual Rows': 500,
+            'Actual Loops': 1,
+            'Sort Key': ['created_at DESC'],
+            'Sort Method': 'top-N heapsort',
+            'Sort Space Used': 31,
+            'Sort Space Type': 'Memory',
+            'Shared Hit Blocks': 24692,
+            'Shared Read Blocks': 8152,
+            Plans: [
+              {
+                'Node Type': 'Seq Scan',
+                'Parent Relationship': 'Outer',
+                'Relation Name': 'orders',
+                Alias: 'orders',
+                'Startup Cost': 0.0,
+                'Total Cost': 134233.0,
+                'Plan Rows': 400,
+                'Plan Width': 44,
+                'Actual Startup Time': 0.041,
+                'Actual Total Time': 379.742,
+                'Actual Rows': 500,
+                'Actual Loops': 1,
+                Filter: '(customer_id = 42)',
+                'Rows Removed by Filter': 499500,
+                'Shared Hit Blocks': 24692,
+                'Shared Read Blocks': 8152,
+              },
+            ],
+          },
+        ],
       },
-    ]),
-    explainText: `Limit  (cost=134245.01..134245.01 rows=20 width=44) (actual time=379.816..380.124 rows=20 loops=1)
+      'Planning Time': 0.231,
+      Triggers: [],
+      'Execution Time': 380.221,
+    },
+  ]),
+  explainText: `Limit  (cost=134245.01..134245.01 rows=20 width=44) (actual time=379.816..380.124 rows=20 loops=1)
       Buffers: shared hit=24740 read=8154
   ->  Sort  (cost=134245.00..134245.01 rows=500 width=44) (actual time=379.804..379.912 rows=500 loops=1)
         Sort Key: created_at DESC
@@ -95,7 +96,9 @@ export const SAMPLES: Sample[] = [
               Buffers: shared hit=24692 read=8152
 Planning Time: 0.231 ms
 Execution Time: 380.221 ms`,
-  },
+};
+
+const BASE_SAMPLES: Sample[] = [
   {
     id: 'leading-wildcard-like',
     title: 'Leading-wildcard LIKE on products.name',
@@ -520,4 +523,17 @@ CREATE TABLE customers (
 Planning Time: 0.842 ms
 Execution Time: 8213.104 ms`,
   },
+];
+
+export const SAMPLES: Sample[] = [
+  missingIndex,
+  {
+    ...missingIndex,
+    id: 'missing-index-text',
+    title: 'Missing index on orders.customer_id (text EXPLAIN)',
+    blurb:
+      'The same missing-index scenario, pasted as classic text EXPLAIN output instead of JSON.',
+    format: 'text',
+  },
+  ...BASE_SAMPLES,
 ];

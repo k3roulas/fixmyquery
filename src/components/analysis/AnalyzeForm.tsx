@@ -19,7 +19,7 @@ export default function AnalyzeForm({ busy, onSubmit }: Props) {
     const sample = SAMPLES.find((s) => s.id === id);
     if (!sample) return;
     setSql(sample.sql);
-    setExplainInput(sample.explainJson);
+    setExplainInput(sample.format === 'text' ? sample.explainText : sample.explainJson);
     setTitle(sample.title);
   }
 

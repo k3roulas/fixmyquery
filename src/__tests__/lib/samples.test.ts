@@ -89,9 +89,10 @@ describe('samples sanity', () => {
     });
   }
 
-  it('covers the five seeded scenarios', () => {
+  it('covers the seeded scenarios', () => {
     expect(SAMPLES.map((s) => s.id)).toEqual([
       'missing-index',
+      'missing-index-text',
       'leading-wildcard-like',
       'offset-pagination',
       'join-cardinality-explosion',
