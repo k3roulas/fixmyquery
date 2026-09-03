@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export default async function HistoryDetailPage({ params }: PageProps<'/history/[id]'>) {
   const session = await getSession();
   if (!session) {
-    redirect('/login');
+    redirect('/login?next=/history');
   }
 
   const { id } = await params;

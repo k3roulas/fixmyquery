@@ -26,7 +26,9 @@ export default function LoginPage() {
         setError((body as { error?: string } | null)?.error ?? 'Sign in failed');
         return;
       }
-      router.push('/');
+      const next = new URLSearchParams(window.location.search).get('next');
+      const safe = next?.startsWith('/') === true && !next.startsWith('//') ? next : '/app';
+      router.push(safe);
       router.refresh();
     } catch {
       setError('Network error — is the server running?');

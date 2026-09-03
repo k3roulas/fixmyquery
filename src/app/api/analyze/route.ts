@@ -11,6 +11,11 @@ const AnalyzeInput = z.object({
 });
 
 export async function POST(req: Request) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -29,13 +34,10 @@ export async function POST(req: Request) {
   try {
     const result = await runAnalysis(parsed.data);
 
-    const session = await getSession();
-    if (session) {
-      const id = await saveAnalysis(session.userId, result);
-      if (id) {
-        result.saved = true;
-        result.analysisId = id;
-      }
+    const id = await saveAnalysis(session.userId, result);
+    if (id) {
+      result.saved = true;
+      result.analysisId = id;
     }
 
     return NextResponse.json(result);

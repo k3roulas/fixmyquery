@@ -37,11 +37,11 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
               </span>
             </Link>
             <nav className="flex items-center gap-4 text-sm">
-              <Link href="/" className="text-zinc-300 hover:text-emerald-400">
-                Analyze
-              </Link>
               {session ? (
                 <>
+                  <Link href="/app" className="text-zinc-300 hover:text-emerald-400">
+                    Analyze
+                  </Link>
                   <Link href="/history" className="text-zinc-300 hover:text-emerald-400">
                     History
                   </Link>

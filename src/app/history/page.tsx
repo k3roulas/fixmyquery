@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export default async function HistoryPage() {
   const session = await getSession();
   if (!session) {
-    redirect('/login');
+    redirect('/login?next=/history');
   }
 
   const rows = await listAnalyses(session.userId);

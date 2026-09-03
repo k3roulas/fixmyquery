@@ -8,7 +8,7 @@ import ErrorBanner from './ErrorBanner';
 import ResultsView from './ResultsView';
 import SaveHint from './SaveHint';
 
-export default function Workspace({ signedIn }: { signedIn: boolean }) {
+export default function Workspace() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -63,9 +63,7 @@ export default function Workspace({ signedIn }: { signedIn: boolean }) {
         {result ? (
           <div className="space-y-4">
             <ResultsView result={result} />
-            {result.saved || !signedIn ? (
-              <SaveHint saved={result.saved} analysisId={result.analysisId} />
-            ) : null}
+            {result.saved ? <SaveHint analysisId={result.analysisId} /> : null}
           </div>
         ) : (
           !error && (
