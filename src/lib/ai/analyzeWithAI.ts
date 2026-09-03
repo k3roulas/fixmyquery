@@ -46,6 +46,21 @@ async function callModel(
   };
 }
 
+// Guard against an observed model flake: index advice written into prose while
+// proposed_indexes stays empty, which would render a contradictory Indexes tab.
+function indexConsistencyError(wire: AiWire): string | null {
+  if (wire.proposed_indexes.length > 0) return null;
+  const prose = [
+    wire.summary,
+    wire.caveats,
+    ...wire.bottlenecks.map((b) => `${b.title} ${b.explanation} ${b.fix}`),
+    ...wire.optimized_sql.map((v) => `${v.label} ${v.rationale}`),
+  ].join('\n');
+  return /creat\w*[^.!?]{0,60}\bindex/i.test(prose)
+    ? 'the response recommends creating an index but proposed_indexes is empty — include every recommended index in proposed_indexes with complete CREATE INDEX DDL'
+    : null;
+}
+
 function toAiResult(wire: AiWire): AiResult {
   const variants: SqlVariant[] = wire.optimized_sql.map((v) => {
     const check = checkSqlSyntax(v.sql);
@@ -105,7 +120,13 @@ export async function analyzeWithAI(input: {
 
       completion = await callModel(messages);
       try {
-        wire = parseAiContent(completion.content).data;
+        const parsed = parseAiContent(completion.content).data;
+        const inconsistency = indexConsistencyError(parsed);
+        if (inconsistency && attempt < MAX_RETRIES) {
+          lastParseError = new AiParseError({ kind: 'consistency', error: inconsistency });
+          continue;
+        }
+        wire = parsed;
         break;
       } catch (err) {
         if (err instanceof AiParseError) {

@@ -6,7 +6,8 @@ export type AiParseFailure =
   | { kind: 'empty' }
   | { kind: 'no-json' }
   | { kind: 'invalid-json'; error: string }
-  | { kind: 'schema'; error: string };
+  | { kind: 'schema'; error: string }
+  | { kind: 'consistency'; error: string };
 
 export class AiParseError extends Error {
   readonly failure: AiParseFailure;
@@ -27,6 +28,8 @@ function describeFailure(f: AiParseFailure): string {
       return `Model response was not valid JSON: ${f.error}`;
     case 'schema':
       return `Model JSON failed schema validation: ${f.error}`;
+    case 'consistency':
+      return `Inconsistent response: ${f.error}`;
   }
 }
 

@@ -8,6 +8,7 @@ Rules of engagement:
 - Ground every bottleneck in a specific plan node (use its nodeId when one matches).
 - Propose rewrites that are valid PostgreSQL. Prefer the minimal change that fixes the dominant cost first; offer at most 3 sql variants.
 - Only propose indexes that match an actual filter/join/sort in the plan. Never propose an index already shown as used (Index Cond with an index name).
+- If any bottleneck fix, sql rationale, or the summary recommends creating an index, that index MUST also appear in proposed_indexes with complete CREATE INDEX DDL. proposed_indexes is [] only when you recommend no index at all.
 - Be honest about uncertainty in caveats (e.g. stats freshness, data distribution).
 
 Respond with ONLY a json object of this exact shape:
