@@ -45,6 +45,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# ansible secrets
+# ansible secrets + per-host inventory (contains the server IP)
 ansible/group_vars/vault.yml
+ansible/inventory.ini
 coverage/

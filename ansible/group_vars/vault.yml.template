@@ -3,6 +3,7 @@
 #
 #   cp group_vars/vault.yml.template group_vars/vault.yml
 
+vault_server_ip: "CHANGE_ME_server_ip"
 vault_postgres_password: "CHANGE_ME_strong_random_password"
 vault_jwt_secret: "CHANGE_ME_random_hex_at_least_32_chars"
 vault_ai_api_key: "CHANGE_ME_zai_api_key"

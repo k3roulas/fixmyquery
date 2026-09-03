@@ -1,0 +1,15 @@
+# Copy to inventory.ini and set the real host IP. inventory.ini is gitignored.
+#
+#   cp inventory.ini.example inventory.ini
+#
+# The [vault] group must keep listing the host — group_vars/vault.yml only
+# loads for hosts in a group named after the file (qr quirk).
+
+[vault]
+fixmyquery-server
+
+[production]
+fixmyquery-server ansible_host=YOUR_SERVER_IP ansible_user=root
+
+[production:vars]
+ansible_python_interpreter=/usr/bin/python3

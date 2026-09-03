@@ -7,9 +7,12 @@ app_repo: https://github.com/k3roulas/fixmyquery.git
 app_branch: main
 app_port: 3002
 
-# Public endpoint: bare IP + path prefix (no domain → HTTP only)
-server_ip: 178.105.43.147
+# Public endpoint: bare IP + path prefix (no domain → HTTP only).
+# The IP is vault-sourced so it never lands in the public repo.
+server_ip: "{{ vault_server_ip }}"
 base_path: /FixMyQuery
+# Public origin used for absolute links in emails (proxy headers are unreliable)
+app_origin: "http://{{ server_ip }}"
 
 # PostgreSQL (own database on the shared instance; other databases untouched)
 postgres_user: fixmyquery

@@ -4,7 +4,7 @@ Paste a slow Postgres query and its `EXPLAIN (ANALYZE, BUFFERS)` output. Determi
 
 ![FixMyQuery screenshot](public/marketing/app-overview.png)
 
-Live instance: **http://178.105.43.147/FixMyQuery** · Self-hosting: [deployment guide](ansible/README.md)
+Self-hosting: [deployment guide](ansible/README.md)
 
 ## The 30-second demo
 
@@ -141,7 +141,7 @@ Quality gate: `pnpm check && pnpm typecheck && pnpm test`.
 
 ## Deployment
 
-A live instance runs at **http://178.105.43.147/FixMyQuery** — Caddy → Next.js standalone (PM2, `:3002`) → Postgres 16 on the same box. The ansible playbook in [`ansible/`](ansible/README.md) manages the whole thing (app role + Caddy site + DB), additively — it never touches the other app hosted there.
+A live instance runs at `http://<server-ip>/FixMyQuery` (address deliberately kept out of the repo — it lives in the untracked ansible inventory) — Caddy → Next.js standalone (PM2, `:3002`) → Postgres 16 on the same box. The ansible playbook in [`ansible/`](ansible/README.md) manages the whole thing (app role + Caddy site + DB), additively — it never touches the other app hosted there.
 
 ```bash
 git push origin main                      # the playbook builds from GitHub

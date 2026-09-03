@@ -9,7 +9,7 @@ per-app Caddy config.
 ```
 Internet → Caddy (:80, IP site — no domain, no TLS)
               │
-              └── 178.105.43.147/FixMyQuery/*  →  Next.js standalone  :3002 (localhost)
+              └── <server-ip>/FixMyQuery/*  →  Next.js standalone  :3002 (localhost)
                                                         │
                                                   PostgreSQL :5432 → fixmyquery DB
 ```
@@ -28,15 +28,17 @@ modified.
 
 ## Setup
 
-### 1. Secrets
+### 1. Secrets & inventory
 
 ```bash
 cd ansible
+cp inventory.ini.example inventory.ini   # set the server IP
 cp group_vars/vault.yml.template group_vars/vault.yml
-# fill in: postgres password, JWT secret, Z.ai API key, SMTP (Brevo) credentials
+# fill in: server IP, postgres password, JWT secret, Z.ai API key, SMTP (Brevo) credentials
 ```
 
-`vault.yml` is gitignored. Plaintext is fine (qr practice); encrypt with
+Both `inventory.ini` and `vault.yml` are gitignored — the server address stays
+out of the public repo. `vault.yml` plaintext is fine (qr practice); encrypt with
 `ansible-vault` and add `--ask-vault-pass` if you prefer.
 
 ### 2. Deploy
@@ -61,9 +63,9 @@ app uses Mailpit instead — see the repo README.
 ## Useful commands
 
 ```bash
-ssh root@178.105.43.147 'pm2 list'                     # process status
-ssh root@178.105.43.147 'pm2 logs fixmyquery-web'      # logs
-ssh root@178.105.43.147 'journalctl -u pm2-fixmyquery' # PM2 systemd unit
+ssh root@<server-ip> 'pm2 list'                     # process status
+ssh root@<server-ip> 'pm2 logs fixmyquery-web'      # logs
+ssh root@<server-ip> 'journalctl -u pm2-fixmyquery' # PM2 systemd unit
 ```
 
 ## Rollback
@@ -71,7 +73,7 @@ ssh root@178.105.43.147 'journalctl -u pm2-fixmyquery' # PM2 systemd unit
 Releases live in `/opt/fixmyquery/releases` (last 3 kept). To roll back:
 
 ```bash
-ssh root@178.105.43.147
+ssh root@<server-ip>
 ln -sfn /opt/fixmyquery/releases/<older-timestamp> /opt/fixmyquery/current
 sudo -u fixmyquery pm2 restart fixmyquery-web
 ```

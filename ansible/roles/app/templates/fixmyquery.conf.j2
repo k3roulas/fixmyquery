@@ -2,7 +2,10 @@
 # IP-only site: no domain, so no TLS (explicit http:// scheme keeps Caddy from trying).
 
 http://{{ server_ip }} {
-	redir / {{ base_path }}/ 308
+	# Bare IP root: blank page (intentionally not redirected to the app path).
+	handle / {
+		respond 200
+	}
 
 	# Bare prefix path: proxy directly — Next (trailingSlash=false) would
 	# bounce /FixMyQuery/ back to /FixMyQuery, so redirecting here would loop.
