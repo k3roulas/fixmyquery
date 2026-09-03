@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
-import LogoutButton from '@/components/LogoutButton';
+import LogoutButton from '@/components/auth/LogoutButton';
 import { getSession } from '@/lib/auth/session';
+import { ROUTES } from '@/lib/routes';
 
 import './globals.css';
 
@@ -41,10 +42,10 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
             <nav className="flex items-center gap-4 text-sm">
               {session ? (
                 <>
-                  <Link href="/app" className="text-zinc-300 hover:text-emerald-400">
+                  <Link href={ROUTES.app} className="text-zinc-300 hover:text-emerald-400">
                     Analyze
                   </Link>
-                  <Link href="/history" className="text-zinc-300 hover:text-emerald-400">
+                  <Link href={ROUTES.history} className="text-zinc-300 hover:text-emerald-400">
                     History
                   </Link>
                   <span className="hidden max-w-48 truncate font-mono text-xs text-zinc-500 sm:inline">
@@ -54,11 +55,11 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-zinc-300 hover:text-emerald-400">
+                  <Link href={ROUTES.login} className="text-zinc-300 hover:text-emerald-400">
                     Sign in
                   </Link>
                   <Link
-                    href="/register"
+                    href={ROUTES.register}
                     className="rounded-lg bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-500"
                   >
                     Register

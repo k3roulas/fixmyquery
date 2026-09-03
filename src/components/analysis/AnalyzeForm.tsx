@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { SAMPLES } from '@/lib/samples';
 
-import { inputClass, textareaClass } from './styles';
+import { inputClass, textareaClass } from '../ui/styles';
 
 interface Props {
   busy: boolean;
@@ -25,7 +25,6 @@ export default function AnalyzeForm({ busy, onSubmit }: Props) {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (busy) return;
     onSubmit({ sql, explainInput, title: title || undefined });
   }
 

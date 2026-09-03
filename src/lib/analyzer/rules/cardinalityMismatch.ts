@@ -1,6 +1,10 @@
 import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
+// Flags nodes where the planner's row estimate wildly diverges from reality:
+// over-estimated (est > 1000 but <1% of actual) or under-estimated (actual
+// > 100 and >100x the estimate). Bad estimates cascade — the planner picks
+// join strategies and memory sizes based on them.
 export const cardinalityMismatch: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {

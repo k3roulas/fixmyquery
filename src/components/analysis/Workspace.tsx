@@ -1,23 +1,20 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { postJson } from '@/lib/api-client';
 import type { AnalysisResult } from '@/lib/types';
 
+import ErrorBanner from '../ui/ErrorBanner';
+import PageContainer from '../ui/PageContainer';
 import AnalyzeForm from './AnalyzeForm';
-import ErrorBanner from './ErrorBanner';
-import PageContainer from './PageContainer';
 import ResultsView from './ResultsView';
 
 export default function Workspace() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const inFlight = useRef(false);
 
   async function analyze(input: { sql: string; explainInput: string; title?: string | undefined }) {
-    if (inFlight.current) return;
-    inFlight.current = true;
     setBusy(true);
     setError(null);
     const res = await postJson<AnalysisResult>('/api/analyze', input, 'Analysis failed');
@@ -27,7 +24,6 @@ export default function Workspace() {
     } else {
       setResult(res.data);
     }
-    inFlight.current = false;
     setBusy(false);
   }
 

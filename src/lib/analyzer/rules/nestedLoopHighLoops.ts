@@ -1,6 +1,9 @@
 import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
+// A Nested Loop re-runs its inner side once per outer row. When the inner
+// child ran >1,000 loops AND eats >10% of query time, that O(outer × inner)
+// behavior is the likely bottleneck.
 export const nestedLoopHighLoops: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {

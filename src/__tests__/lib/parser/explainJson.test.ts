@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-import { parseExplainJson } from './explainJson';
+import { parseExplainJson } from '@/lib/parser/explainJson';
 
 const PLAN = JSON.stringify([
   {

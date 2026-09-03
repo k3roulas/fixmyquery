@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-import { parseExplainText } from './explainText';
+import { parseExplainText } from '@/lib/parser/explainText';
 
 const PLAN = `Limit  (cost=100.01..100.01 rows=20 width=44) (actual time=379.816..380.124 rows=20 loops=1)
   ->  Sort  (cost=100.00..100.01 rows=500 width=44) (actual time=379.804..379.912 rows=500 loops=1)

@@ -2,7 +2,7 @@
 
 import type { IndexSuggestion } from '@/lib/types';
 
-import SqlBlock from './SqlBlock';
+import SqlBlock from '../ui/SqlBlock';
 
 export default function IndexSuggestions({ suggestions }: { suggestions: IndexSuggestion[] }) {
   if (suggestions.length === 0) {

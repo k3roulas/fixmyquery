@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-
-import { signSession, verifySessionToken } from './session';
+import { signSession, verifySessionToken } from '@/lib/auth/session';
 
 beforeAll(() => {
   process.env.JWT_SECRET = 'test-secret-for-vitest-only-32chars!';

@@ -17,6 +17,9 @@ export const RULES: Rule[] = [
   largeOffset,
 ];
 
+// Applies every rule to the plan and flattens the results — each rule is
+// independent and returns zero or more findings. To add a new check, write a
+// rule module and register it in RULES above; nothing else needs to change.
 export function runRules(ctx: RuleContext): Finding[] {
   return RULES.flatMap((rule) => rule(ctx));
 }

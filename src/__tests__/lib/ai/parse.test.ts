@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-import { AiParseError, parseAiContent } from './parse';
+import { AiParseError, parseAiContent } from '@/lib/ai/parse';
 
 const VALID = JSON.stringify({
   summary: 'The seq scan dominates.',

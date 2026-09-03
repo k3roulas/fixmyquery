@@ -1,19 +1,16 @@
 import Link from 'next/link';
-import { notFound, redirect } from 'next/navigation';
-import PageContainer from '@/components/PageContainer';
-import ResultsView from '@/components/ResultsView';
-import { getSession } from '@/lib/auth/session';
+import { notFound } from 'next/navigation';
+import ResultsView from '@/components/analysis/ResultsView';
+import PageContainer from '@/components/ui/PageContainer';
+import { requireSession } from '@/lib/auth/guard';
 import { getAnalysis } from '@/lib/history-service';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HistoryDetailPage({ params }: PageProps<'/history/[id]'>) {
-  const session = await getSession();
-  if (!session) {
-    redirect('/login?next=/history');
-  }
-
   const { id } = await params;
+  const session = await requireSession(ROUTES.historyDetail(id));
   const result = await getAnalysis(id, session.userId);
   if (!result) {
     notFound();
@@ -22,7 +19,7 @@ export default async function HistoryDetailPage({ params }: PageProps<'/history/
   return (
     <PageContainer className="space-y-4">
       <div className="flex items-center justify-between">
-        <Link href="/history" className="text-sm text-emerald-400 hover:underline">
+        <Link href={ROUTES.history} className="text-sm text-emerald-400 hover:underline">
           ← Back to history
         </Link>
         <span className="text-xs text-zinc-500">saved analysis</span>

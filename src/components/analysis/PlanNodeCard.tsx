@@ -23,6 +23,7 @@ interface Props {
 }
 
 export default function PlanNodeCard({ node, selected, flagged, onSelect }: Props) {
+  // Table + alias display label, e.g. "orders as o"; empty for nodes without a relation (Sort, Join…)
   const label = [node.relation, node.alias].filter(Boolean).join(' as ');
   const hasTime = node.inclusiveMs > 0;
 

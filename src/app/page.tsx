@@ -2,6 +2,7 @@ import Link from 'next/link';
 import FeatureCard from '@/components/marketing/FeatureCard';
 import ScreenshotPlaceholder from '@/components/marketing/ScreenshotPlaceholder';
 import { getSession } from '@/lib/auth/session';
+import { ROUTES } from '@/lib/routes';
 
 export default async function MarketingPage() {
   const session = await getSession();
@@ -23,7 +24,7 @@ export default async function MarketingPage() {
         <div className="flex flex-wrap items-center justify-center gap-3">
           {session ? (
             <Link
-              href="/app"
+              href={ROUTES.app}
               className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
             >
               Open the app
@@ -31,13 +32,13 @@ export default async function MarketingPage() {
           ) : (
             <>
               <Link
-                href="/register"
+                href={ROUTES.register}
                 className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
               >
                 Create an account
               </Link>
               <Link
-                href="/login"
+                href={ROUTES.login}
                 className="rounded-lg border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-200 hover:border-emerald-600 hover:text-emerald-400"
               >
                 Sign in

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-import { checkSqlSyntax } from './sqlCheck';
+import { checkSqlSyntax } from '@/lib/validate/sqlCheck';
 
 describe('checkSqlSyntax', () => {
   it('accepts a plain select', () => {

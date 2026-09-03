@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
-
-import type { PlanNode } from '../types';
-import { computeMetrics, computeTotals, walk } from './metrics';
+import { computeMetrics, computeTotals, walk } from '@/lib/analyzer/metrics';
+import type { PlanNode } from '@/lib/types';
 
 function node(over: Partial<PlanNode>): PlanNode {
   return {

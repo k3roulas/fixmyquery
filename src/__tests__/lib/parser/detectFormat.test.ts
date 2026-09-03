@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-import { detectFormat } from './detectFormat';
+import { detectFormat } from '@/lib/parser/detectFormat';
 
 describe('detectFormat', () => {
   it('detects JSON arrays and objects', () => {

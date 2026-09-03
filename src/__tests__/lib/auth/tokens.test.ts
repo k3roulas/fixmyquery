@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-
-import { generateToken, hashToken, isTokenUsable } from './tokens';
+import { generateToken, hashToken, isTokenUsable } from '@/lib/auth/tokens';
 
 describe('tokens', () => {
   it('generates 64-char hex tokens', () => {

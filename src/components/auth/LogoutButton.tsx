@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { BASE_PATH } from '@/lib/api-client';
+import { ROUTES } from '@/lib/routes';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function LogoutButton() {
     setBusy(true);
     try {
       await fetch(`${BASE_PATH}/api/auth/logout`, { method: 'POST' });
-      router.push('/');
+      router.push(ROUTES.home);
       router.refresh();
     } finally {
       setBusy(false);

@@ -5,6 +5,9 @@ import type { AnalysisResult, ParsedPlan } from '@/lib/types';
 
 export class ParseError extends Error {}
 
+// Titles the analysis in history lists when the user didn't provide one:
+// first non-empty SQL line, whitespace collapsed, capped at 80 chars so
+// history rows stay scannable.
 function deriveTitle(sql: string): string {
   const firstLine = sql
     .split('\n')

@@ -1,16 +1,13 @@
-import { redirect } from 'next/navigation';
-import HistoryTable from '@/components/HistoryTable';
-import PageContainer from '@/components/PageContainer';
-import { getSession } from '@/lib/auth/session';
+import HistoryTable from '@/components/history/HistoryTable';
+import PageContainer from '@/components/ui/PageContainer';
+import { requireSession } from '@/lib/auth/guard';
 import { listAnalyses } from '@/lib/history-service';
+import { ROUTES } from '@/lib/routes';
 
 export const dynamic = 'force-dynamic';
 
 export default async function HistoryPage() {
-  const session = await getSession();
-  if (!session) {
-    redirect('/login?next=/history');
-  }
+  const session = await requireSession(ROUTES.history);
 
   const rows = await listAnalyses(session.userId);
 

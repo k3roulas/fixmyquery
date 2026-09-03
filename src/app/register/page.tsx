@@ -2,19 +2,25 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import ErrorBanner from '@/components/ErrorBanner';
-import { inputClass } from '@/components/styles';
+import ErrorBanner from '@/components/ui/ErrorBanner';
+import { inputClass } from '@/components/ui/styles';
 import { postJson } from '@/lib/api-client';
+import { ROUTES } from '@/lib/routes';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (password !== confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
     setBusy(true);
     setError(null);
     const res = await postJson('/api/auth/register', { email, password }, 'Registration failed');
@@ -48,7 +54,7 @@ export default function RegisterPage() {
             to find the email.
           </p>
           <Link
-            href="/login"
+            href={ROUTES.login}
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
           >
             Go to sign in
@@ -101,6 +107,19 @@ export default function RegisterPage() {
           />
           <p className="mt-1 text-xs text-zinc-600">At least 8 characters.</p>
         </div>
+        <div>
+          <label htmlFor="confirm" className="mb-1 block text-sm font-medium text-zinc-300">
+            Confirm password
+          </label>
+          <input
+            id="confirm"
+            type="password"
+            required
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            className={inputClass}
+          />
+        </div>
         <button
           type="submit"
           disabled={busy}
@@ -112,7 +131,7 @@ export default function RegisterPage() {
 
       <p className="mt-4 text-sm text-zinc-500">
         Already registered?{' '}
-        <Link href="/login" className="text-emerald-400 hover:underline">
+        <Link href={ROUTES.login} className="text-emerald-400 hover:underline">
           Sign in
         </Link>
       </p>

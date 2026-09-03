@@ -1,6 +1,9 @@
 import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
+// Detects a Hash build side that didn't fit in work_mem: Postgres split it
+// into batches (hashBatches > 1) or wrote temp blocks. Batched reads are far
+// slower than one in-memory pass.
 export const hashSpillToDisk: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {

@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import ErrorBanner from '@/components/ErrorBanner';
-import { inputClass } from '@/components/styles';
+import ErrorBanner from '@/components/ui/ErrorBanner';
+import { inputClass } from '@/components/ui/styles';
 import { postJson } from '@/lib/api-client';
+import { ROUTES } from '@/lib/routes';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function LoginPage() {
       return;
     }
     const next = new URLSearchParams(window.location.search).get('next');
-    const safe = next?.startsWith('/') === true && !next.startsWith('//') ? next : '/app';
+    const safe = next?.startsWith('/') === true && !next.startsWith('//') ? next : ROUTES.app;
     router.push(safe);
     router.refresh();
     setBusy(false);
@@ -82,7 +83,7 @@ export default function LoginPage() {
 
       <p className="mt-4 text-sm text-zinc-500">
         No account yet?{' '}
-        <Link href="/register" className="text-emerald-400 hover:underline">
+        <Link href={ROUTES.register} className="text-emerald-400 hover:underline">
           Register
         </Link>
       </p>

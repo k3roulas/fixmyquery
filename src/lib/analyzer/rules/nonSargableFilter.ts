@@ -8,6 +8,9 @@ const NON_SARGABLE = [
   /\b(date_trunc|extract|date_part)\s*\(/i,
 ];
 
+// Heuristic regex match on each node's filter text: leading-wildcard LIKE or
+// a function wrapped around the column (lower/upper/date_trunc/extract) means
+// a plain B-tree index can't serve the predicate, forcing a scan.
 export const nonSargableFilter: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {

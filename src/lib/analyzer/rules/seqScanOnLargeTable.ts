@@ -1,6 +1,9 @@
 import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
+// Seq Scans are fine on small tables — this only fires when one processes
+// >10k rows AND burns >20% of query time; severity jumps to high past 50%.
+// "Processed" counts both matched rows and rows discarded by the filter.
 export const seqScanOnLargeTable: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {

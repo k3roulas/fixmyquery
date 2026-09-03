@@ -2,7 +2,7 @@
 
 import type { SqlVariant } from '@/lib/types';
 
-import SqlBlock from './SqlBlock';
+import SqlBlock from '../ui/SqlBlock';
 
 export default function SqlVariants({ variants }: { variants: SqlVariant[] }) {
   if (variants.length === 0) {

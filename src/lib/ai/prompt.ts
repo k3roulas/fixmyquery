@@ -44,6 +44,10 @@ function nodeLine(node: ParsedPlan['root'], depth: number): string {
   return `${'  '.repeat(depth)}${parts.join(' ')}`;
 }
 
+// Produces something like this:
+// n0 Nested Loop 12.4ms 34% est=100 act=98 loops=1
+//   n1 Seq Scan on orders 8.1ms 22% est=5000 act=120 loops=1 removed=4880 filter=(status = 'pending')
+//   n2 Index Scan using idx_users_id on users 3.2ms 9% ...
 export function buildPlanOutline(plan: ParsedPlan): string {
   const lines: string[] = [];
   const depths = new Map<string, number>();

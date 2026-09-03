@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-
-import { runDeterministicAnalysis } from './analyzer';
-import { parseExplain } from './parser';
-import { SAMPLES } from './samples';
-import type { PlanNode } from './types';
+import { runDeterministicAnalysis } from '@/lib/analyzer';
+import { parseExplain } from '@/lib/parser';
+import { SAMPLES } from '@/lib/samples';
+import type { PlanNode } from '@/lib/types';
 
 const BUFFER_KEYS = [
   'sharedHitBlocks',

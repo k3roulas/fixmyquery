@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { postJson } from '@/lib/api-client';
+import { ROUTES } from '@/lib/routes';
 
 function VerifyInner() {
   const params = useSearchParams();
@@ -61,7 +62,7 @@ function VerifyInner() {
         </p>
         {state === 'ok' ? (
           <Link
-            href="/login"
+            href={ROUTES.login}
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
           >
             Sign in
@@ -69,7 +70,7 @@ function VerifyInner() {
         ) : null}
         {state !== 'ok' && state !== 'pending' ? (
           <Link
-            href="/register"
+            href={ROUTES.register}
             className="mt-4 inline-block text-sm text-emerald-400 hover:underline"
           >
             Back to registration

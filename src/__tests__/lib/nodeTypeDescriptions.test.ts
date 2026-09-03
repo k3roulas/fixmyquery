@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-
-import { describeNodeType } from './nodeTypeDescriptions';
-import { parseExplain } from './parser';
-import { SAMPLES } from './samples';
+import { describeNodeType } from '@/lib/nodeTypeDescriptions';
+import { parseExplain } from '@/lib/parser';
+import { SAMPLES } from '@/lib/samples';
 
 const FALLBACK = 'No curated description for this node type yet';
 

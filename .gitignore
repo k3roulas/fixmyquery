@@ -47,3 +47,4 @@ next-env.d.ts
 
 # ansible secrets
 ansible/group_vars/vault.yml
+coverage/

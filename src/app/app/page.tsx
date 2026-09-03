@@ -1,11 +1,9 @@
-import { redirect } from 'next/navigation';
-import Workspace from '@/components/Workspace';
-import { getSession } from '@/lib/auth/session';
+import Workspace from '@/components/analysis/Workspace';
+import { requireSession } from '@/lib/auth/guard';
+
+export const dynamic = 'force-dynamic';
 
 export default async function AppPage() {
-  const session = await getSession();
-  if (!session) {
-    redirect('/login?next=/app');
-  }
+  await requireSession();
   return <Workspace />;
 }

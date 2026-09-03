@@ -12,11 +12,10 @@ vi.mock('@/lib/history-service', () => ({
   saveAnalysis: vi.fn(),
 }));
 
+import { POST } from '@/app/api/analyze/route';
 import { runAnalysis } from '@/lib/analysis-service';
 import { getSession } from '@/lib/auth/session';
 import { saveAnalysis } from '@/lib/history-service';
-
-import { POST } from './route';
 
 const mockedGetSession = vi.mocked(getSession);
 const mockedRunAnalysis = vi.mocked(runAnalysis);

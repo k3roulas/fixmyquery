@@ -4,6 +4,12 @@
 http://{{ server_ip }} {
 	redir / {{ base_path }}/ 308
 
+	# Bare prefix path: proxy directly — Next (trailingSlash=false) would
+	# bounce /FixMyQuery/ back to /FixMyQuery, so redirecting here would loop.
+	handle {{ base_path }} {
+		reverse_proxy localhost:{{ app_port }}
+	}
+
 	handle {{ base_path }}/* {
 		reverse_proxy localhost:{{ app_port }}
 	}

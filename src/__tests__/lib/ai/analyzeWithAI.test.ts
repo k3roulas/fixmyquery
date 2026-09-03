@@ -1,18 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('./client', () => ({
+vi.mock('@/lib/ai/client', () => ({
   AI_MODEL: 'test-model',
   AI_THINKING: 'disabled',
   getAiClient: vi.fn(),
   isAiConfigured: () => true,
 }));
 
+import { analyzeWithAI } from '@/lib/ai/analyzeWithAI';
+import { getAiClient } from '@/lib/ai/client';
 import { runDeterministicAnalysis } from '@/lib/analyzer';
 import { parseExplain } from '@/lib/parser';
 import { SAMPLES } from '@/lib/samples';
-
-import { analyzeWithAI } from './analyzeWithAI';
-import { getAiClient } from './client';
 
 const mockedGetAiClient = vi.mocked(getAiClient);
 

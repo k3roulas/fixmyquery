@@ -1,15 +1,14 @@
 import { describe, expect, it } from 'vitest';
-
-import { parseExplain } from '../../parser';
-import type { PlanNode, PlanTotals, Rule } from '../../types';
-import { computeTotals } from '../metrics';
-import { cardinalityMismatch } from './cardinalityMismatch';
-import { hashSpillToDisk } from './hashSpillToDisk';
-import { largeOffset } from './largeOffset';
-import { nestedLoopHighLoops } from './nestedLoopHighLoops';
-import { nonSargableFilter } from './nonSargableFilter';
-import { seqScanOnLargeTable } from './seqScanOnLargeTable';
-import { sortSpillToDisk } from './sortSpillToDisk';
+import { computeTotals } from '@/lib/analyzer/metrics';
+import { cardinalityMismatch } from '@/lib/analyzer/rules/cardinalityMismatch';
+import { hashSpillToDisk } from '@/lib/analyzer/rules/hashSpillToDisk';
+import { largeOffset } from '@/lib/analyzer/rules/largeOffset';
+import { nestedLoopHighLoops } from '@/lib/analyzer/rules/nestedLoopHighLoops';
+import { nonSargableFilter } from '@/lib/analyzer/rules/nonSargableFilter';
+import { seqScanOnLargeTable } from '@/lib/analyzer/rules/seqScanOnLargeTable';
+import { sortSpillToDisk } from '@/lib/analyzer/rules/sortSpillToDisk';
+import { parseExplain } from '@/lib/parser';
+import type { PlanNode, PlanTotals, Rule } from '@/lib/types';
 
 function node(over: Partial<PlanNode>): PlanNode {
   return {
@@ -171,8 +170,8 @@ describe('largeOffset', () => {
 
 describe('end-to-end via runDeterministicAnalysis', () => {
   it('is importable and sorts by severity', async () => {
-    const { runDeterministicAnalysis } = await import('../index');
-    const { SAMPLES } = await import('../../samples');
+    const { runDeterministicAnalysis } = await import('@/lib/analyzer/index');
+    const { SAMPLES } = await import('@/lib/samples');
     const sample = SAMPLES.find((s) => s.id === 'offset-pagination');
     if (!sample) throw new Error('sample missing');
     const plan = parseExplain(sample.explainJson);

@@ -1,6 +1,9 @@
 import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
+// A sort that outgrew work_mem and swapped to temp files, detected via the
+// "external merge" method or disk sort space. Severity escalates to high
+// once the sort exceeds ~10MB.
 export const sortSpillToDisk: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {

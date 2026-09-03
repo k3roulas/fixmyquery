@@ -5,9 +5,9 @@ import { findNode } from '@/lib/analyzer/metrics';
 import { formatMs } from '@/lib/format';
 import type { AnalysisResult } from '@/lib/types';
 
+import HelpDot from '../ui/HelpDot';
 import AiSummary from './AiSummary';
 import BottleneckList from './BottleneckList';
-import HelpDot from './HelpDot';
 import IndexSuggestions from './IndexSuggestions';
 import NodeDetailPanel from './NodeDetailPanel';
 import PlanTree from './PlanTree';
@@ -34,6 +34,7 @@ const STAT_HELP: Record<string, string> = {
     '8kB pages spilled to temporary files when sorts or hashes outgrow work_mem. Healthy queries write ~0.',
 };
 
+// Use to display stats from deterministic values on top of the analysis
 function Stat({ label, value }: { label: string; value: string }) {
   const help = STAT_HELP[label];
   return (
@@ -69,6 +70,7 @@ export default function ResultsView({ result }: Props) {
   const tabs: [Tab, string][] = [
     ['tree', 'Plan Tree'],
     ['findings', `Bottlenecks (${result.findings.length})`],
+    // In happy path it shows 5 tabs, in degrading - when AI fails - only 2 tabs (deterministic analysis)
     ...(result.ai
       ? ([
           ['sql', `Optimized SQL (${result.ai.optimized_sql.length})`],
@@ -87,6 +89,7 @@ export default function ResultsView({ result }: Props) {
             {result.explainFormat}
           </span>
           {result.findings.length > 0 ? (
+            // Bottleneck number per serverity
             <div className="group relative flex items-center">
               <span className="rounded border border-red-800/70 bg-red-950/60 px-1.5 py-0.5 text-red-300">
                 {counts.high} high · {counts.medium} med · {counts.low} low

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { AnalysisRowSummary } from '@/lib/history-service';
+import { ROUTES } from '@/lib/routes';
 
 export default function HistoryTable({ rows }: { rows: AnalysisRowSummary[] }) {
   if (rows.length === 0) {
@@ -8,7 +9,7 @@ export default function HistoryTable({ rows }: { rows: AnalysisRowSummary[] }) {
         <p className="font-medium text-zinc-400">No saved analyses yet</p>
         <p className="mt-1">
           Run an analysis while signed in and it will appear here.{' '}
-          <Link href="/" className="text-emerald-400 hover:underline">
+          <Link href={ROUTES.home} className="text-emerald-400 hover:underline">
             Analyze a query →
           </Link>
         </p>
@@ -33,7 +34,7 @@ export default function HistoryTable({ rows }: { rows: AnalysisRowSummary[] }) {
             <tr key={row.id} className="hover:bg-zinc-900/40">
               <td className="max-w-96 px-4 py-2.5">
                 <Link
-                  href={`/history/${row.id}`}
+                  href={ROUTES.historyDetail(row.id)}
                   className="font-medium text-emerald-400 hover:underline"
                 >
                   {row.title}

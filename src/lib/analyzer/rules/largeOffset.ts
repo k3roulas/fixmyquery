@@ -1,5 +1,9 @@
 import type { Finding, Rule } from '../../types';
 
+// The only SQL-text rule (no plan node exists for it): OFFSET >= 10,000 makes
+// Postgres compute and discard all skipped rows, so cost grows linearly with
+// page number. Keyset pagination is the fix. Anchored to the root node (n0)
+// so the finding still renders in the plan view.
 export const largeOffset: Rule = ({ sql }) => {
   const findings: Finding[] = [];
   const re = /offset\s+(\d+)/gi;

@@ -4,7 +4,7 @@ import { formatMs } from '@/lib/format';
 import { describeNodeType } from '@/lib/nodeTypeDescriptions';
 import type { Finding, PlanNode } from '@/lib/types';
 
-import HelpDot from './HelpDot';
+import HelpDot from '../ui/HelpDot';
 
 interface Props {
   node: PlanNode | null;
@@ -62,6 +62,7 @@ export default function NodeDetailPanel({ node, findings }: Props) {
     );
   }
 
+  // Gards division by zero when the planner estimated 0 rows.
   const misestimate = node.estRows > 0 ? `${(node.actualRows / node.estRows).toFixed(1)}×` : 'n/a';
 
   return (

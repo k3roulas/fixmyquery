@@ -8,6 +8,8 @@ import { AiParseError, parseAiContent } from './parse';
 import { buildMessages } from './prompt';
 import type { AiWire } from './schema';
 
+// One repair attempt after the initial call; two failures in a row give up
+// and degrade to deterministic findings only.
 const MAX_RETRIES = 1;
 const MAX_REASONING_CHARS = 4000;
 
@@ -106,10 +108,18 @@ export async function analyzeWithAI(input: {
     let lastParseError: AiParseError | null = null;
     let wire: AiWire | null = null;
 
+    // Attempt 0 sends exactly two messages (system prompt + user payload from
+    // buildMessages). Any attempt > 0 with a recorded error appends a repair
+    // exchange below, so the request becomes a 4-message mini-conversation:
+    // system, user, the model's failed answer, and a correction request — the
+    // model can see and fix its own output, and the JSON-shape contract in the
+    // system prompt is re-read untouched on every attempt.
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
         ...baseMessages,
       ];
+      // Fires for both schema-validation and index-consistency failures —
+      // anything that sets lastParseError gets repair context on the retry.
       if (attempt > 0 && completion && lastParseError) {
         messages.push({ role: 'assistant', content: completion.content || '(empty response)' });
         messages.push({
