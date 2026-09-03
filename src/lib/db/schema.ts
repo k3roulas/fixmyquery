@@ -1,5 +1,5 @@
 import { integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import type { AiResult, Finding, PlanNode, PlanTotals } from '@/lib/types';
+import type { AiResult, ExplainFormat, Finding, PlanNode, PlanTotals } from '@/lib/types';
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -28,7 +28,7 @@ export const analyses = pgTable('analyses', {
   title: text('title').notNull(),
   sql: text('sql').notNull(),
   explainInput: text('explain_input').notNull(),
-  explainFormat: text('explain_format').notNull(),
+  explainFormat: text('explain_format').$type<ExplainFormat>().notNull(),
   planJson: jsonb('plan_json').$type<{ root: PlanNode; totals: PlanTotals }>().notNull(),
   deterministicFindings: jsonb('deterministic_findings').$type<Finding[]>().notNull().default([]),
   aiResult: jsonb('ai_result').$type<AiResult>(),

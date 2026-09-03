@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { findNode } from '@/lib/analyzer/metrics';
+import { formatMs } from '@/lib/format';
 import type { AnalysisResult } from '@/lib/types';
 
 import AiSummary from './AiSummary';
@@ -8,7 +10,6 @@ import BottleneckList from './BottleneckList';
 import HelpDot from './HelpDot';
 import IndexSuggestions from './IndexSuggestions';
 import NodeDetailPanel from './NodeDetailPanel';
-import { formatMs } from './PlanNodeCard';
 import PlanTree from './PlanTree';
 import SqlVariants from './SqlVariants';
 
@@ -51,6 +52,7 @@ export default function ResultsView({ result }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(result.root.id);
 
   const selected = selectedId === null ? null : (findNode(result.root, selectedId) ?? result.root);
+
   const nodeFindings = result.findings.filter((f) => selected !== null && f.nodeId === selected.id);
 
   function locate(nodeId: string) {
@@ -164,13 +166,4 @@ export default function ResultsView({ result }: Props) {
       ) : null}
     </div>
   );
-}
-
-function findNode(root: AnalysisResult['root'], id: string): AnalysisResult['root'] | null {
-  if (root.id === id) return root;
-  for (const child of root.children) {
-    const found = findNode(child, id);
-    if (found) return found;
-  }
-  return null;
 }

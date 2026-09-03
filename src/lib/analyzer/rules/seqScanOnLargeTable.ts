@@ -1,7 +1,7 @@
-import type { Finding, PlanNode, PlanTotals } from '../../types';
+import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
-export function seqScanOnLargeTable(root: PlanNode, _totals: PlanTotals): Finding[] {
+export const seqScanOnLargeTable: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {
     if (node.nodeType !== 'Seq Scan') continue;
@@ -20,4 +20,4 @@ export function seqScanOnLargeTable(root: PlanNode, _totals: PlanTotals): Findin
     });
   }
   return findings;
-}
+};

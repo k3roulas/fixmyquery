@@ -1,7 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { analyses } from '@/lib/db/schema';
-import type { AnalysisResult, ExplainFormat } from '@/lib/types';
+import type { AnalysisResult } from '@/lib/types';
 
 export interface AnalysisRowSummary {
   id: string;
@@ -68,7 +68,7 @@ export async function getAnalysis(id: string, userId: string): Promise<AnalysisR
     title: row.title,
     sql: row.sql,
     explainInput: row.explainInput,
-    explainFormat: row.explainFormat as ExplainFormat,
+    explainFormat: row.explainFormat,
     root: row.planJson.root,
     totals: row.planJson.totals,
     findings: row.deterministicFindings,

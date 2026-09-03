@@ -1,6 +1,6 @@
-import type { Finding } from '../../types';
+import type { Finding, Rule } from '../../types';
 
-export function largeOffset(sql: string): Finding[] {
+export const largeOffset: Rule = ({ sql }) => {
   const findings: Finding[] = [];
   const re = /offset\s+(\d+)/gi;
   let m: RegExpExecArray | null = re.exec(sql);
@@ -20,4 +20,4 @@ export function largeOffset(sql: string): Finding[] {
     m = re.exec(sql);
   }
   return findings;
-}
+};

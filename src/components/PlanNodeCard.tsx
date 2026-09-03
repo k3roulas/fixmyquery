@@ -1,5 +1,6 @@
 'use client';
 
+import { formatMs } from '@/lib/format';
 import type { PlanNode } from '@/lib/types';
 
 function shareColor(pct: number): string {
@@ -59,10 +60,4 @@ export default function PlanNodeCard({ node, selected, flagged, onSelect }: Prop
       </div>
     </button>
   );
-}
-
-export function formatMs(ms: number): string {
-  if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
-  if (ms >= 1) return `${ms.toFixed(1)}ms`;
-  return `${Math.round(ms * 1000)}µs`;
 }

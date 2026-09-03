@@ -34,3 +34,10 @@ export function* walk(node: PlanNode): Generator<PlanNode> {
     yield* walk(child);
   }
 }
+
+export function findNode(root: PlanNode, id: string): PlanNode | null {
+  for (const node of walk(root)) {
+    if (node.id === id) return node;
+  }
+  return null;
+}

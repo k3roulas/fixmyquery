@@ -1,7 +1,7 @@
-import type { Finding, PlanNode, PlanTotals } from '../../types';
+import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
-export function sortSpillToDisk(root: PlanNode, _totals: PlanTotals): Finding[] {
+export const sortSpillToDisk: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {
     const spilled =
@@ -21,4 +21,4 @@ export function sortSpillToDisk(root: PlanNode, _totals: PlanTotals): Finding[] 
     });
   }
   return findings;
-}
+};

@@ -1,4 +1,4 @@
-import type { Finding, PlanNode, PlanTotals } from '../../types';
+import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
 const NON_SARGABLE = [
@@ -8,7 +8,7 @@ const NON_SARGABLE = [
   /\b(date_trunc|extract|date_part)\s*\(/i,
 ];
 
-export function nonSargableFilter(root: PlanNode, _totals: PlanTotals): Finding[] {
+export const nonSargableFilter: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {
     const predicate = node.filter ?? node.joinFilter;
@@ -26,4 +26,4 @@ export function nonSargableFilter(root: PlanNode, _totals: PlanTotals): Finding[
     });
   }
   return findings;
-}
+};

@@ -1,11 +1,9 @@
-import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { parseJsonBody } from '@/lib/api';
 import { sendVerificationEmail } from '@/lib/auth/mailer';
 import { hashPassword } from '@/lib/auth/password';
-import { generateToken, hashToken, TOKEN_TTL_MS } from '@/lib/auth/tokens';
-import { db } from '@/lib/db';
-import { users, verificationTokens } from '@/lib/db/schema';
+import { createUserWithVerificationToken, findUserByEmail } from '@/lib/auth/users-service';
 
 const RegisterInput = z.object({
   email: z.string().email(),
@@ -13,47 +11,27 @@ const RegisterInput = z.object({
 });
 
 export async function POST(req: Request) {
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
+  const body = await parseJsonBody(req, RegisterInput);
+  if (!body.ok) return body.response;
 
-  const parsed = RegisterInput.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
-      { status: 400 }
-    );
-  }
+  const email = body.data.email.toLowerCase();
 
-  const email = parsed.data.email.toLowerCase();
-
-  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  if (existing.length > 0) {
+  if (await findUserByEmail(email)) {
     return NextResponse.json(
       { error: 'An account with this email already exists' },
       { status: 409 }
     );
   }
 
-  const passwordHash = await hashPassword(parsed.data.password);
-  const [user] = await db.insert(users).values({ email, passwordHash }).returning();
-  if (!user) {
+  const passwordHash = await hashPassword(body.data.password);
+  const created = await createUserWithVerificationToken(email, passwordHash);
+  if (!created) {
     return NextResponse.json({ error: 'Could not create account' }, { status: 500 });
   }
 
-  const token = generateToken();
-  await db.insert(verificationTokens).values({
-    userId: user.id,
-    tokenHash: hashToken(token),
-    expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
-  });
-
   const origin = new URL(req.url).origin;
   try {
-    await sendVerificationEmail(email, `${origin}/verify?token=${token}`);
+    await sendVerificationEmail(email, `${origin}/verify?token=${created.token}`);
   } catch (err) {
     console.error('verification email failed', err);
     return NextResponse.json(

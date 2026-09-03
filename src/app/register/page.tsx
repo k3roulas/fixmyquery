@@ -2,6 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import ErrorBanner from '@/components/ErrorBanner';
+import { inputClass } from '@/components/styles';
+import { postJson } from '@/lib/api-client';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -14,21 +17,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        setError((body as { error?: string } | null)?.error ?? 'Registration failed');
-        return;
-      }
+    const res = await postJson('/api/auth/register', { email, password }, 'Registration failed');
+    if (res.ok) {
       setDone(true);
-    } catch {
-      setError('Network error — is the server running?');
-    } finally {
+    } else {
+      setError(res.error);
       setBusy(false);
     }
   }
@@ -74,11 +67,8 @@ export default function RegisterPage() {
       </p>
 
       {error ? (
-        <div
-          role="alert"
-          className="mb-4 rounded-lg border border-red-900/60 bg-red-950/40 px-3 py-2 text-sm text-red-200"
-        >
-          {error}
+        <div className="mb-4">
+          <ErrorBanner message={error} />
         </div>
       ) : null}
 
@@ -93,7 +83,7 @@ export default function RegisterPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-emerald-600 focus:outline-none"
+            className={inputClass}
           />
         </div>
         <div>
@@ -107,7 +97,7 @@ export default function RegisterPage() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-emerald-600 focus:outline-none"
+            className={inputClass}
           />
           <p className="mt-1 text-xs text-zinc-600">At least 8 characters.</p>
         </div>

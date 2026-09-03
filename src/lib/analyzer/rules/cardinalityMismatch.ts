@@ -1,7 +1,7 @@
-import type { Finding, PlanNode, PlanTotals } from '../../types';
+import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
-export function cardinalityMismatch(root: PlanNode, _totals: PlanTotals): Finding[] {
+export const cardinalityMismatch: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {
     if (node.estRows === 0 && node.actualRows === 0) continue;
@@ -21,4 +21,4 @@ export function cardinalityMismatch(root: PlanNode, _totals: PlanTotals): Findin
     });
   }
   return findings;
-}
+};

@@ -1,7 +1,7 @@
-import type { Finding, PlanNode, PlanTotals } from '../../types';
+import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
-export function nestedLoopHighLoops(root: PlanNode, _totals: PlanTotals): Finding[] {
+export const nestedLoopHighLoops: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {
     if (node.nodeType !== 'Nested Loop') continue;
@@ -19,4 +19,4 @@ export function nestedLoopHighLoops(root: PlanNode, _totals: PlanTotals): Findin
     }
   }
   return findings;
-}
+};

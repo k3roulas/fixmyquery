@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { parseExplain } from '../../parser';
-import type { PlanNode, PlanTotals } from '../../types';
+import type { PlanNode, PlanTotals, Rule } from '../../types';
 import { computeTotals } from '../metrics';
 import { cardinalityMismatch } from './cardinalityMismatch';
 import { hashSpillToDisk } from './hashSpillToDisk';
@@ -30,10 +30,18 @@ function totalsFor(root: PlanNode, executionMs = 100): PlanTotals {
   return computeTotals(root, 0, executionMs);
 }
 
+function run(
+  rule: Rule,
+  root: PlanNode,
+  opts?: { totals?: PlanTotals; sql?: string }
+): ReturnType<Rule> {
+  return rule({ root, totals: opts?.totals ?? totalsFor(root), sql: opts?.sql ?? '' });
+}
+
 describe('seqScanOnLargeTable', () => {
   it('flags big filtered seq scans', () => {
     const root = node({ rowsRemovedByFilter: 499_500, actualRows: 500 });
-    const findings = seqScanOnLargeTable(root, totalsFor(root));
+    const findings = run(seqScanOnLargeTable, root);
     expect(findings).toHaveLength(1);
     expect(findings[0]?.severity).toBe('high');
     expect(findings[0]?.ruleId).toBe('seq-scan-large-table');
@@ -41,31 +49,31 @@ describe('seqScanOnLargeTable', () => {
 
   it('ignores small tables', () => {
     const root = node({ rowsRemovedByFilter: 500, actualRows: 50 });
-    expect(seqScanOnLargeTable(root, totalsFor(root))).toHaveLength(0);
+    expect(run(seqScanOnLargeTable, root)).toHaveLength(0);
   });
 
   it('ignores index scans', () => {
     const root = node({ nodeType: 'Index Scan', rowsRemovedByFilter: 500_000 });
-    expect(seqScanOnLargeTable(root, totalsFor(root))).toHaveLength(0);
+    expect(run(seqScanOnLargeTable, root)).toHaveLength(0);
   });
 });
 
 describe('cardinalityMismatch', () => {
   it('flags underestimates over 100x', () => {
     const root = node({ estRows: 200, actualRows: 40_000 });
-    const findings = cardinalityMismatch(root, totalsFor(root));
+    const findings = run(cardinalityMismatch, root);
     expect(findings).toHaveLength(1);
     expect(findings[0]?.severity).toBe('high');
   });
 
   it('flags overestimates when actual is tiny', () => {
     const root = node({ estRows: 500_000, actualRows: 10 });
-    expect(cardinalityMismatch(root, totalsFor(root))).toHaveLength(1);
+    expect(run(cardinalityMismatch, root)).toHaveLength(1);
   });
 
   it('accepts estimates within 100x', () => {
     const root = node({ estRows: 1_000, actualRows: 40_000 });
-    expect(cardinalityMismatch(root, totalsFor(root))).toHaveLength(0);
+    expect(run(cardinalityMismatch, root)).toHaveLength(0);
   });
 });
 
@@ -80,7 +88,7 @@ describe('nestedLoopHighLoops', () => {
     const outer = node({ id: 'n0', nodeType: 'Nested Loop', children: [inner] });
     const totals = totalsFor(outer, 5_000);
     inner.timeSharePct = 62;
-    const findings = nestedLoopHighLoops(outer, totals);
+    const findings = run(nestedLoopHighLoops, outer, { totals });
     expect(findings).toHaveLength(1);
     expect(findings[0]?.nodeId).toBe('n0');
   });
@@ -88,7 +96,7 @@ describe('nestedLoopHighLoops', () => {
   it('ignores nested loops with few repetitions', () => {
     const inner = node({ id: 'n1', actualLoops: 20 });
     const outer = node({ id: 'n0', nodeType: 'Nested Loop', children: [inner] });
-    expect(nestedLoopHighLoops(outer, totalsFor(outer))).toHaveLength(0);
+    expect(run(nestedLoopHighLoops, outer)).toHaveLength(0);
   });
 });
 
@@ -100,32 +108,32 @@ describe('sortSpillToDisk', () => {
       sortSpaceUsedKb: 24_188,
       sortSpaceType: 'Disk',
     });
-    const findings = sortSpillToDisk(root, totalsFor(root));
+    const findings = run(sortSpillToDisk, root);
     expect(findings).toHaveLength(1);
     expect(findings[0]?.severity).toBe('high');
   });
 
   it('flags small spills as medium and ignores in-memory sorts', () => {
     const small = node({ nodeType: 'Sort', sortMethod: 'external merge', sortSpaceUsedKb: 900 });
-    expect(sortSpillToDisk(small, totalsFor(small))[0]?.severity).toBe('medium');
+    expect(run(sortSpillToDisk, small)[0]?.severity).toBe('medium');
 
     const memory = node({ nodeType: 'Sort', sortMethod: 'quicksort', sortSpaceType: 'Memory' });
-    expect(sortSpillToDisk(memory, totalsFor(memory))).toHaveLength(0);
+    expect(run(sortSpillToDisk, memory)).toHaveLength(0);
   });
 });
 
 describe('hashSpillToDisk', () => {
   it('flags hashed batches over 1', () => {
     const root = node({ nodeType: 'Hash', hashBatches: 64, hashBuckets: 262_144 });
-    const findings = hashSpillToDisk(root, totalsFor(root));
+    const findings = run(hashSpillToDisk, root);
     expect(findings).toHaveLength(1);
   });
 
   it('ignores single-batch hashes and non-hash nodes', () => {
     const ok = node({ nodeType: 'Hash', hashBatches: 1 });
-    expect(hashSpillToDisk(ok, totalsFor(ok))).toHaveLength(0);
+    expect(run(hashSpillToDisk, ok)).toHaveLength(0);
     const notHash = node({ nodeType: 'Sort', hashBatches: 8 });
-    expect(hashSpillToDisk(notHash, totalsFor(notHash))).toHaveLength(0);
+    expect(run(hashSpillToDisk, notHash)).toHaveLength(0);
   });
 });
 
@@ -137,25 +145,27 @@ describe('nonSargableFilter', () => {
     "(date_trunc('day', created_at) = '2026-01-01'::date)",
   ])('flags %s', (predicate) => {
     const root = node({ filter: predicate });
-    expect(nonSargableFilter(root, totalsFor(root))).toHaveLength(1);
+    expect(run(nonSargableFilter, root)).toHaveLength(1);
   });
 
   it('passes sargable predicates', () => {
     const root = node({ filter: '(customer_id = 42)' });
-    expect(nonSargableFilter(root, totalsFor(root))).toHaveLength(0);
+    expect(run(nonSargableFilter, root)).toHaveLength(0);
   });
 });
 
 describe('largeOffset', () => {
   it('flags OFFSET >= 10000', () => {
-    const findings = largeOffset('SELECT * FROM t ORDER BY x LIMIT 50 OFFSET 50000');
+    const findings = run(largeOffset, node({}), {
+      sql: 'SELECT * FROM t ORDER BY x LIMIT 50 OFFSET 50000',
+    });
     expect(findings).toHaveLength(1);
     expect(findings[0]?.ruleId).toBe('large-offset');
   });
 
   it('passes small offsets and no offset', () => {
-    expect(largeOffset('SELECT * FROM t OFFSET 20')).toHaveLength(0);
-    expect(largeOffset('SELECT * FROM t')).toHaveLength(0);
+    expect(run(largeOffset, node({}), { sql: 'SELECT * FROM t OFFSET 20' })).toHaveLength(0);
+    expect(run(largeOffset, node({}), { sql: 'SELECT * FROM t' })).toHaveLength(0);
   });
 });
 

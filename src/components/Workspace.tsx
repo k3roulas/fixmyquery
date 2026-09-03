@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { postJson } from '@/lib/api-client';
 import type { AnalysisResult } from '@/lib/types';
 
 import AnalyzeForm from './AnalyzeForm';
@@ -20,28 +21,15 @@ export default function Workspace() {
     inFlight.current = true;
     setBusy(true);
     setError(null);
-    try {
-      const res = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(input),
-      });
-      const body = await res.json().catch(() => null);
-      if (!res.ok) {
-        setResult(null);
-        setError(
-          (body as { error?: string } | null)?.error ?? `Analysis failed (HTTP ${res.status})`
-        );
-        return;
-      }
-      setResult(body as AnalysisResult);
-    } catch {
+    const res = await postJson<AnalysisResult>('/api/analyze', input, 'Analysis failed');
+    if (!res.ok) {
       setResult(null);
-      setError('Could not reach the analysis endpoint. Is the dev server running?');
-    } finally {
-      inFlight.current = false;
-      setBusy(false);
+      setError(res.error);
+    } else {
+      setResult(res.data);
     }
+    inFlight.current = false;
+    setBusy(false);
   }
 
   return (

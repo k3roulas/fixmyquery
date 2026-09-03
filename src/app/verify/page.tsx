@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
+import { postJson } from '@/lib/api-client';
 
 function VerifyInner() {
   const params = useSearchParams();
@@ -20,23 +21,17 @@ function VerifyInner() {
     attempted.current = true;
 
     (async () => {
-      try {
-        const res = await fetch('/api/auth/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
-        const body = await res.json().catch(() => null);
-        if (res.ok) {
-          setState('ok');
-          setMessage((body as { message?: string } | null)?.message ?? 'Email verified');
-        } else {
-          setState('error');
-          setMessage((body as { error?: string } | null)?.error ?? 'Verification failed');
-        }
-      } catch {
+      const res = await postJson<{ message?: string }>(
+        '/api/auth/verify',
+        { token },
+        'Verification failed'
+      );
+      if (res.ok) {
+        setState('ok');
+        setMessage(res.data.message ?? 'Email verified');
+      } else {
         setState('error');
-        setMessage('Network error — is the server running?');
+        setMessage(res.error);
       }
     })();
   }, [token]);

@@ -1,7 +1,7 @@
-import type { Finding, PlanNode, PlanTotals } from '../../types';
+import type { Finding, Rule } from '../../types';
 import { walk } from '../metrics';
 
-export function hashSpillToDisk(root: PlanNode, _totals: PlanTotals): Finding[] {
+export const hashSpillToDisk: Rule = ({ root }) => {
   const findings: Finding[] = [];
   for (const node of walk(root)) {
     const spilled = (node.hashBatches ?? 1) > 1 || (node.tempWrittenBlocks ?? 0) > 0;
@@ -17,4 +17,4 @@ export function hashSpillToDisk(root: PlanNode, _totals: PlanTotals): Finding[] 
     });
   }
   return findings;
-}
+};

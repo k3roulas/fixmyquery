@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ParseError, runAnalysis } from '@/lib/analysis-service';
+import { parseJsonBody } from '@/lib/api';
 import { getSession } from '@/lib/auth/session';
 import { saveAnalysis } from '@/lib/history-service';
 
@@ -16,23 +17,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
   }
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
-
-  const parsed = AnalyzeInput.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
-      { status: 400 }
-    );
-  }
+  const body = await parseJsonBody(req, AnalyzeInput);
+  if (!body.ok) return body.response;
 
   try {
-    const result = await runAnalysis(parsed.data);
+    const result = await runAnalysis(body.data);
 
     const id = await saveAnalysis(session.userId, result);
     if (id) {

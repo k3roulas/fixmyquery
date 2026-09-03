@@ -31,7 +31,7 @@ describe('parseAiContent', () => {
   });
 
   it('strips markdown fences', () => {
-    const fenced = '```json\n' + VALID + '\n```';
+    const fenced = `\`\`\`json\n${VALID}\n\`\`\``;
     const { data } = parseAiContent(fenced);
     expect(data.optimized_sql).toHaveLength(1);
   });

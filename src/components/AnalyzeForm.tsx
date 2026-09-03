@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { SAMPLES } from '@/lib/samples';
 
+import { inputClass, textareaClass } from './styles';
+
 interface Props {
   busy: boolean;
   onSubmit: (input: { sql: string; explainInput: string; title?: string | undefined }) => void;
@@ -62,7 +64,7 @@ export default function AnalyzeForm({ busy, onSubmit }: Props) {
           rows={6}
           spellCheck={false}
           placeholder="SELECT ... FROM ... WHERE ..."
-          className="w-full resize-y rounded-lg border border-zinc-800 bg-zinc-950 p-3 font-mono text-xs text-zinc-200 placeholder:text-zinc-600 focus:border-emerald-600 focus:outline-none"
+          className={textareaClass}
         />
       </div>
 
@@ -77,7 +79,7 @@ export default function AnalyzeForm({ busy, onSubmit }: Props) {
           rows={10}
           spellCheck={false}
           placeholder="EXPLAIN (ANALYZE, BUFFERS) SELECT ... — paste the plan here"
-          className="w-full resize-y rounded-lg border border-zinc-800 bg-zinc-950 p-3 font-mono text-xs text-zinc-200 placeholder:text-zinc-600 focus:border-emerald-600 focus:outline-none"
+          className={textareaClass}
         />
       </div>
 
@@ -90,7 +92,7 @@ export default function AnalyzeForm({ busy, onSubmit }: Props) {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-emerald-600 focus:outline-none"
+          className={inputClass}
         />
       </div>
 

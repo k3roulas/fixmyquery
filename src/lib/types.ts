@@ -55,6 +55,14 @@ export interface Finding {
   suggestion: string;
 }
 
+export interface RuleContext {
+  root: PlanNode;
+  totals: PlanTotals;
+  sql: string;
+}
+
+export type Rule = (ctx: RuleContext) => Finding[];
+
 export interface AiBottleneck {
   nodeId?: string | undefined;
   title: string;

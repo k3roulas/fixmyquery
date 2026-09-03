@@ -1,10 +1,10 @@
 'use client';
 
+import { formatMs } from '@/lib/format';
+import { describeNodeType } from '@/lib/nodeTypeDescriptions';
 import type { Finding, PlanNode } from '@/lib/types';
 
 import HelpDot from './HelpDot';
-import { describeNodeType } from './nodeTypeDescriptions';
-import { formatMs } from './PlanNodeCard';
 
 interface Props {
   node: PlanNode | null;
