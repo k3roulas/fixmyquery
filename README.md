@@ -1,8 +1,10 @@
 # FixMyQuery
 
-Paste a slow Postgres query and its `EXPLAIN (ANALYZE, BUFFERS)` output. Deterministic plan rules find the bottlenecks first; a reasoning LLM — grounded in those measured numbers — explains them in plain English and proposes optimized SQL and index DDL. Every AI rewrite is syntax-checked with a real SQL parser before it's shown to you.
+Paste a slow Postgres query and its `EXPLAIN (ANALYZE, BUFFERS)` output. Deterministic plan rules find the bottlenecks first; a reasoning LLM — grounded in those measured numbers — explains them in plain English and proposes optimized SQL and `CREATE INDEX` statements. Every AI rewrite is syntax-checked with a real SQL parser before it's shown to you.
 
-![FixMyQuery screenshot](docs/screenshot.png)
+![FixMyQuery screenshot](public/marketing/app-overview.png)
+
+Live instance: **http://178.105.43.147/FixMyQuery** · Self-hosting: [deployment guide](ansible/README.md)
 
 ## The 30-second demo
 
@@ -14,7 +16,7 @@ pnpm db:generate && pnpm db:migrate
 pnpm dev                 # http://localhost:3000
 ```
 
-Pick a sample scenario from the dropdown → **Analyze query** → you get an interactive plan tree with time-share bars, deterministic findings, AI-verified bottlenecks, validated SQL rewrites, index DDL, and the model's full reasoning. No account needed — registering (with email verification via Mailpit) only adds persistence and history.
+Register → click the verification link in the [Mailpit inbox](http://localhost:8025) → sign in → pick a sample scenario → **Analyze query**. You get an interactive plan tree with time-share bars, deterministic findings, AI-verified bottlenecks, validated SQL rewrites, index proposals, and the model's full reasoning. An account is required (analyses are persisted per user); the deterministic rules run regardless of the AI stage's health.
 
 ## Why this isn't just "wrap an LLM around EXPLAIN"
 
@@ -100,7 +102,8 @@ With more time: streaming the AI stage, an evals corpus (plan → expected bottl
 
 ```
 src/
-├── app/                      routes: / (workspace), /login /register /verify /history
+├── app/                      routes: / (marketing), /app (workspace),
+│                             /login /register /verify /history
 │   └── api/                  analyze, auth/{register,verify,login,logout}
 ├── components/               Workspace, AnalyzeForm, ResultsView, PlanTree,
 │                             PlanNodeCard, NodeDetailPanel, BottleneckList,
@@ -112,7 +115,8 @@ src/
     ├── validate/sqlCheck     node-sql-parser (PostgreSQL dialect)
     ├── auth/                 password (scrypt), tokens, session (jose), mailer
     ├── db/                   drizzle client + schema (users, tokens, analyses)
-    ├── samples.ts            5 seeded scenarios, JSON + text variants
+    ├── samples.ts            seeded scenarios as JSON + text (one also exposed
+                              as a text-EXPLAIN dropdown entry)
     └── analysis-service.ts   pipeline orchestrator shared by API + history
 ```
 
@@ -135,22 +139,35 @@ To exercise persistence: register at `/register` → open the [Mailpit inbox](ht
 
 Quality gate: `pnpm check && pnpm typecheck && pnpm test`.
 
+## Deployment
+
+A live instance runs at **http://178.105.43.147/FixMyQuery** — Caddy → Next.js standalone (PM2, `:3002`) → Postgres 16 on the same box. The ansible playbook in [`ansible/`](ansible/README.md) manages the whole thing (app role + Caddy site + DB), additively — it never touches the other app hosted there.
+
+```bash
+git push origin main                      # the playbook builds from GitHub
+cd ansible && ansible-playbook deploy.yml # full deploy (idempotent)
+cd ansible && ansible-playbook deploy.yml --tags app   # code update only
+```
+
+Production-only env (rendered by the playbook into `/opt/fixmyquery/current/.env`, never committed): `SMTP_USER`/`SMTP_PASSWORD` (Brevo relay), `NEXT_PUBLIC_BASE_PATH=/FixMyQuery` (build-time, must match `basePath` in next.config.ts), `COOKIE_SECURE=false` (IP-only site, no TLS — `Secure` cookies would never be sent), `NODE_ENV=production`.
+
 ## Sample scenarios
 
 | Sample | Demonstrates |
 |---|---|
 | Missing index on `orders.customer_id` | seq scan discarding 499.5k/500k rows |
+| Missing index (text EXPLAIN) | the same scenario pasted as classic text output |
 | Leading-wildcard `LIKE '%phone%'` | non-SARGABLE filter, trigram candidate |
 | `OFFSET 50000` pagination | deep offset → keyset pagination rewrite |
 | Join cardinality explosion | est 200 vs actual 40k → nested-loop inner loops |
 | Sort + hash spilling to disk | `external merge` 182MB, `Batches: 64` → work_mem |
 
-Each sample ships in both JSON and text EXPLAIN formats with internally consistent arithmetic (loops×rows, buffers, timings) — they double as parser fixtures: `samples.test.ts` asserts both formats parse to the same finding set and totals, and that every plan is coherent (a parent's time and buffer counts cover its children's, the root accounts for ~all execution time, a disk sort's temp writes match its reported space). That suite caught a real parser bug: `Buffers: shared hit=132 read=4256` lines were losing their `read` count.
+Every sample carries both a JSON and a text EXPLAIN with internally consistent arithmetic (loops×rows, buffers, timings) — they double as parser fixtures: `samples.test.ts` asserts both formats parse to the same finding set and totals, and that every plan is coherent (a parent's time and buffer counts cover its children's, the root accounts for ~all execution time, a disk sort's temp writes match its reported space). That suite caught a real parser bug: `Buffers: shared hit=132 read=4256` lines were losing their `read` count.
 
 ## Trade-offs & cut scope
 
 - **JWT sessions without a revocation store** — 7-day tokens, no logout-everywhere. A session table would be the first addition.
-- **Mailpit is a dev mailer** — fine for the demo; production needs real SMTP and a sender domain.
+- **Mailpit is a dev mailer** — production sends through the Brevo relay (see [Deployment](#deployment)).
 - **Paste-only input** — no live connection to user databases (by design: an EXPLAIN paste is safer than credentials, and the tool is about reading plans, not accessing data).
 - **Text-plan parser covers the common node/attribute set** — exotic plan lines are attached as attributes or ignored; JSON is the recommended format (and the samples' default).
 - **node-sql-parser is a syntax gate, not a PG semantic checker** — a failed check is a warning chip, never a blocker; it doesn't cover every Postgres dialect quirk.

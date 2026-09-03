@@ -101,12 +101,12 @@ describe('POST /api/analyze', () => {
     expect(body.error).toBe('SQL query is required');
   });
 
-  it('runs the analysis, saves it, and returns it flagged with its id', async () => {
+  it('runs the analysis, saves it, and returns the saved result', async () => {
     const session = { userId: 'u1', email: 'a@b.c' };
     const result = stubResult();
     mockedGetSession.mockResolvedValue(session);
     mockedRunAnalysis.mockResolvedValue(result);
-    mockedSaveAnalysis.mockResolvedValue('abc123');
+    mockedSaveAnalysis.mockResolvedValue({ ...result, saved: true, analysisId: 'abc123' });
 
     const res = await POST(request(validBody));
 
@@ -117,10 +117,11 @@ describe('POST /api/analyze', () => {
     expect(body.analysisId).toBe('abc123');
   });
 
-  it('leaves the result unsaved when persistence fails', async () => {
+  it('returns the result unsaved when persistence fails', async () => {
     mockedGetSession.mockResolvedValue({ userId: 'u1', email: 'a@b.c' });
-    mockedRunAnalysis.mockResolvedValue(stubResult());
-    mockedSaveAnalysis.mockResolvedValue(null);
+    const result = stubResult();
+    mockedRunAnalysis.mockResolvedValue(result);
+    mockedSaveAnalysis.mockResolvedValue(result);
 
     const res = await POST(request(validBody));
 

@@ -21,15 +21,9 @@ export async function POST(req: Request) {
   if (!body.ok) return body.response;
 
   try {
-    const result = await runAnalysis(body.data);
-
-    const id = await saveAnalysis(session.userId, result);
-    if (id) {
-      result.saved = true;
-      result.analysisId = id;
-    }
-
-    return NextResponse.json(result);
+    const analysis = await runAnalysis(body.data);
+    const stored = await saveAnalysis(session.userId, analysis);
+    return NextResponse.json(stored);
   } catch (err) {
     if (err instanceof ParseError) {
       return NextResponse.json({ error: err.message }, { status: 422 });

@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { BASE_PATH } from '@/lib/api-client';
-import { ROUTES } from '@/lib/routes';
+import { BASE_PATH, ROUTES } from '@/lib/routes';
 
 export default function LogoutButton() {
   const router = useRouter();

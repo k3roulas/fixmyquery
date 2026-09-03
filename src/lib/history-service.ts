@@ -13,7 +13,13 @@ export interface AnalysisRowSummary {
   createdAt: Date;
 }
 
-export async function saveAnalysis(userId: string, result: AnalysisResult): Promise<string | null> {
+// Persists the analysis and returns it annotated with its saved state, so
+// callers never mutate the result themselves. A failed save is non-fatal:
+// the analysis still comes back, just unsaved.
+export async function saveAnalysis(
+  userId: string,
+  result: AnalysisResult
+): Promise<AnalysisResult> {
   try {
     const [row] = await db
       .insert(analyses)
@@ -31,10 +37,11 @@ export async function saveAnalysis(userId: string, result: AnalysisResult): Prom
         durationMs: result.durationMs,
       })
       .returning({ id: analyses.id });
-    return row?.id ?? null;
+    if (!row) return result;
+    return { ...result, saved: true, analysisId: row.id };
   } catch (err) {
     console.error('failed to persist analysis', err);
-    return null;
+    return result;
   }
 }
 

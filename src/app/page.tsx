@@ -2,11 +2,7 @@ import Link from 'next/link';
 import FeatureCard from '@/components/marketing/FeatureCard';
 import Screenshot from '@/components/marketing/Screenshot';
 import { getSession } from '@/lib/auth/session';
-import { ROUTES } from '@/lib/routes';
-
-// Unoptimized next/image skips the basePath-aware loader, so public asset srcs
-// need the prefix manually (see images.unoptimized in next.config.ts).
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+import { BASE_PATH, ROUTES } from '@/lib/routes';
 
 export default async function MarketingPage() {
   const session = await getSession();
@@ -50,6 +46,8 @@ export default async function MarketingPage() {
             </>
           )}
         </div>
+        {/* Unoptimized next/image skips the basePath-aware loader, so the src
+            needs the prefix manually (see images.unoptimized in next.config.ts). */}
         <Screenshot
           src={`${BASE_PATH}/marketing/app-overview.png`}
           alt="The FixMyQuery workspace: query input on the left, full analysis results on the right"
@@ -89,8 +87,8 @@ export default async function MarketingPage() {
           Ready to fix your slow query?
         </h2>
         <p className="mx-auto max-w-2xl text-sm text-zinc-400">
-          Analyzing queries works without an account — registering lets you keep a history of your
-          analyses.
+          Create an account to get started — every analysis is saved to your history, ready to
+          replay anytime.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           {session ? (

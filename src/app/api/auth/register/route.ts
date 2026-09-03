@@ -4,7 +4,7 @@ import { parseJsonBody } from '@/lib/api';
 import { sendVerificationEmail } from '@/lib/auth/mailer';
 import { hashPassword } from '@/lib/auth/password';
 import { createUserWithVerificationToken, findUserByEmail } from '@/lib/auth/users-service';
-import { ROUTES } from '@/lib/routes';
+import { BASE_PATH, ROUTES } from '@/lib/routes';
 
 const RegisterInput = z.object({
   email: z.string().email(),
@@ -31,9 +31,8 @@ export async function POST(req: Request) {
   }
 
   const origin = new URL(req.url).origin;
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
   try {
-    await sendVerificationEmail(email, `${origin}${basePath}${ROUTES.verify(created.token)}`);
+    await sendVerificationEmail(email, `${origin}${BASE_PATH}${ROUTES.verify(created.token)}`);
   } catch (err) {
     console.error('verification email failed', err);
     return NextResponse.json(
