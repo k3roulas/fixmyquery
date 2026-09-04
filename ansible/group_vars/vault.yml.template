@@ -12,3 +12,6 @@ vault_ai_api_key: "CHANGE_ME_zai_api_key"
 vault_smtp_host: "CHANGE_ME_smtp_host"
 vault_smtp_user: "CHANGE_ME_smtp_user"
 vault_smtp_password: "CHANGE_ME_smtp_password"
+
+# Slack incoming webhook
+vault_slack_webhook_url: "CHANGE_ME_slack_webhook_url"

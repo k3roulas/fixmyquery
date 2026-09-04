@@ -5,6 +5,13 @@ import { sendVerificationEmail } from '@/lib/auth/mailer';
 import { hashPassword } from '@/lib/auth/password';
 import { createUserWithVerificationToken, findUserByEmail } from '@/lib/auth/users-service';
 import { BASE_PATH, ROUTES } from '@/lib/routes';
+import {
+  buildErrorMessage,
+  buildRegistrationSubmittedMessage,
+  buildRegistrationSuccessMessage,
+  buildVerificationEmailSentMessage,
+  notifySlack,
+} from '@/lib/slack';
 
 const RegisterInput = z.object({
   email: z.string().email(),
@@ -24,6 +31,8 @@ export async function POST(req: Request) {
     );
   }
 
+  notifySlack(() => buildRegistrationSubmittedMessage(email));
+
   const passwordHash = await hashPassword(body.data.password);
   const created = await createUserWithVerificationToken(email, passwordHash);
   if (!created) {
@@ -36,13 +45,18 @@ export async function POST(req: Request) {
   const origin = process.env.APP_ORIGIN ?? new URL(req.url).origin;
   try {
     await sendVerificationEmail(email, `${origin}${BASE_PATH}${ROUTES.verify(created.token)}`);
+    notifySlack(() => buildVerificationEmailSentMessage(email));
   } catch (err) {
     console.error('verification email failed', err);
+    notifySlack(() =>
+      buildErrorMessage(err, { source: 'Registration', path: 'POST /api/auth/register' })
+    );
     return NextResponse.json(
       { error: 'Account created but the verification email could not be sent' },
       { status: 500 }
     );
   }
 
+  notifySlack(() => buildRegistrationSuccessMessage(email));
   return NextResponse.json({ message: 'Check your email to verify your account' }, { status: 201 });
 }

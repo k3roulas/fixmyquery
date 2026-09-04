@@ -1,6 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { analyses } from '@/lib/db/schema';
+import { buildErrorMessage, notifySlack } from '@/lib/slack';
 import type { AnalysisResult } from '@/lib/types';
 
 export interface AnalysisRowSummary {
@@ -41,6 +42,7 @@ export async function saveAnalysis(
     return { ...result, saved: true, analysisId: row.id };
   } catch (err) {
     console.error('failed to persist analysis', err);
+    notifySlack(() => buildErrorMessage(err, { source: 'History persistence' }));
     return result;
   }
 }

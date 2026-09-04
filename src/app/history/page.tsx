@@ -3,6 +3,7 @@ import PageContainer from '@/components/ui/PageContainer';
 import { requireSession } from '@/lib/auth/guard';
 import { listAnalyses } from '@/lib/history-service';
 import { ROUTES } from '@/lib/routes';
+import { buildHistoryViewedMessage, notifySlack } from '@/lib/slack';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,7 @@ export default async function HistoryPage() {
   const session = await requireSession(ROUTES.history);
 
   const rows = await listAnalyses(session.userId);
+  notifySlack(() => buildHistoryViewedMessage(session.email, rows.length));
 
   return (
     <PageContainer className="space-y-4">

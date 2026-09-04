@@ -5,6 +5,7 @@ import PageContainer from '@/components/ui/PageContainer';
 import { requireSession } from '@/lib/auth/guard';
 import { getAnalysis } from '@/lib/history-service';
 import { ROUTES } from '@/lib/routes';
+import { buildHistoryDetailViewedMessage, notifySlack } from '@/lib/slack';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,8 @@ export default async function HistoryDetailPage({ params }: PageProps<'/history/
   if (!result) {
     notFound();
   }
+
+  notifySlack(() => buildHistoryDetailViewedMessage(session.email, { id, title: result.title }));
 
   return (
     <PageContainer className="space-y-4">

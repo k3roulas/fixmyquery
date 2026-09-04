@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { parseJsonBody } from '@/lib/api';
-import { consumeVerificationToken } from '@/lib/auth/users-service';
+import { consumeVerificationToken, findUserById } from '@/lib/auth/users-service';
+import { buildEmailVerifiedMessage, notifySlack } from '@/lib/slack';
 
 const VerifyInput = z.object({ token: z.string().min(1, 'Token is required') });
 
@@ -19,6 +20,9 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return NextResponse.json({ error: FAILURE_MESSAGES[result.reason] }, { status: 400 });
   }
+
+  const user = await findUserById(result.userId);
+  notifySlack(() => buildEmailVerifiedMessage(user?.email ?? result.userId));
 
   return NextResponse.json({ message: 'Email verified — you can sign in now' });
 }

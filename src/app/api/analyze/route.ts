@@ -4,6 +4,7 @@ import { ParseError, runAnalysis } from '@/lib/analysis-service';
 import { parseJsonBody } from '@/lib/api';
 import { getSession } from '@/lib/auth/session';
 import { saveAnalysis } from '@/lib/history-service';
+import { buildAnalysisLaunchedMessage, buildErrorMessage, notifySlack } from '@/lib/slack';
 
 const AnalyzeInput = z.object({
   sql: z.string().min(1, 'SQL query is required'),
@@ -20,6 +21,13 @@ export async function POST(req: Request) {
   const body = await parseJsonBody(req, AnalyzeInput);
   if (!body.ok) return body.response;
 
+  notifySlack(() =>
+    buildAnalysisLaunchedMessage(session.email, {
+      title: body.data.title,
+      sql: body.data.sql,
+    })
+  );
+
   try {
     const analysis = await runAnalysis(body.data);
     const stored = await saveAnalysis(session.userId, analysis);
@@ -29,6 +37,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: err.message }, { status: 422 });
     }
     console.error('analyze failed', err);
+    notifySlack(() => buildErrorMessage(err, { source: 'Analysis', path: 'POST /api/analyze' }));
     return NextResponse.json({ error: 'Analysis failed unexpectedly' }, { status: 500 });
   }
 }
